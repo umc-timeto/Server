@@ -27,7 +27,7 @@ public class KakaoClient {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
 
-    // [기능] 인가코드로 카카오 access token 발급
+    // 인가코드로 카카오 access token 발급
     public String getAccessToken(String authorizationCode) {
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
 
@@ -65,7 +65,7 @@ public class KakaoClient {
         return accessToken;
     }
 
-    // [기능] 카카오 access token으로 사용자 정보 조회
+    // 카카오 access token으로 사용자 정보 조회
     public KakaoUserInfo getUserInfo(String kakaoAccessToken) {
         String meUrl = "https://kapi.kakao.com/v2/user/me";
 
