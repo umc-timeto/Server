@@ -1,5 +1,7 @@
 package com.umc.timeto.auth.jwt;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -7,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -26,7 +29,7 @@ public class JwtProvider {
 
     @PostConstruct
     public void init() {
-        signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     // access token 발급
@@ -37,6 +40,31 @@ public class JwtProvider {
     // refresh token 발급
     public String createRefreshToken(Long memberId) {
         return createToken(memberId, refreshExpSeconds);
+    }
+
+    // 토큰 유효성 검증
+    public boolean validateToken(String token) {
+        try {
+            parseClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("validateToken error = " + e.getClass().getName() + " / " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 토큰에서 memberId 추출
+    public Long getMemberId(String token) {
+        Claims claims = parseClaims(token);
+        return Long.valueOf(claims.getSubject());
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(signingKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     private String createToken(Long memberId, long expSeconds) {

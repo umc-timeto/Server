@@ -2,6 +2,7 @@ package com.umc.timeto.auth.controller;
 
 import com.umc.timeto.auth.dto.KakaoLoginRequest;
 import com.umc.timeto.auth.dto.KakaoLoginResponse;
+import com.umc.timeto.auth.dto.LogoutResponse;
 import com.umc.timeto.auth.service.AuthService;
 import com.umc.timeto.global.apiPayload.code.ResponseCode;
 import com.umc.timeto.global.apiPayload.dto.ResponseDTO;
@@ -40,4 +41,29 @@ public class AuthController {
                 .status(responseCode.getStatus())
                 .body(new ResponseDTO<>(responseCode, result.response()));
     }
+
+    //로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDTO<LogoutResponse>> logout(
+            @RequestHeader(value = "Authorization", required = false) String authorization
+    ) {
+        System.out.println("Authorization header = " + authorization);
+
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return ResponseEntity
+                    .status(ResponseCode.COMMON401.getStatus())
+                    .body(new ResponseDTO<>(ResponseCode.COMMON401));
+        }
+
+        String accessToken = authorization.substring(7).trim();
+        System.out.println("accessToken = " + accessToken);
+
+        authService.logout(accessToken);
+
+        return ResponseEntity
+                .status(ResponseCode.COMMON200.getStatus())
+                .body(new ResponseDTO<>(ResponseCode.COMMON200, new LogoutResponse("로그아웃 성공")));
+    }
+
+
 }
