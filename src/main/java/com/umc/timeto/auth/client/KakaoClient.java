@@ -9,14 +9,16 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.ClientHttpResponse;
+import java.io.IOException;
 
-//카카오 서버와 직접 통신해서 인가코드 → 사용자 정보를 가져오는 외부 API 전용 클라이언트
 @Component
 @RequiredArgsConstructor
 public class KakaoClient {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createRestTemplate();
 
     @Value("${kakao.client-id}")
     private String clientId;
@@ -27,12 +29,40 @@ public class KakaoClient {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
 
-    // 인가코드로 카카오 access token 발급
+    private RestTemplate createRestTemplate() {
+        RestTemplate template = new RestTemplate();
+        // 4xx/5xx여도 예외로 던지지 말고 ResponseEntity로 받아서 바디 확인 가능하게
+        template.setErrorHandler(new DefaultResponseErrorHandler() {
+            @Override
+            public boolean hasError(ClientHttpResponse response) {
+                return false;
+            }
+        });
+        return template;
+    }
+
+    private void validateKakaoConfig() {
+        if (clientId == null || clientId.isBlank()) {
+            throw new IllegalStateException("kakao.client-id 설정이 비어있습니다. (REST API 키가 들어가야 함)");
+        }
+        if (redirectUri == null || redirectUri.isBlank()) {
+            throw new IllegalStateException("kakao.redirect-uri 설정이 비어있습니다. (인가코드 받을 때 사용한 redirect_uri와 동일해야 함)");
+        }
+    }
+
+    // [기능] 인가코드로 카카오 access token 발급
     public String getAccessToken(String authorizationCode) {
+        validateKakaoConfig();
+
+        if (authorizationCode == null || authorizationCode.isBlank()) {
+            throw new IllegalArgumentException("authorizationCode가 비어있습니다.");
+        }
+
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "authorization_code");
@@ -53,25 +83,34 @@ public class KakaoClient {
                 KakaoTokenResponse.class
         );
 
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new IllegalStateException("카카오 토큰 발급 실패");
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new IllegalStateException(
+                    "카카오 토큰 발급 실패 - status=" + response.getStatusCode()
+                            + ", clientIdEmpty=" + (clientId == null || clientId.isBlank())
+                            + ", redirectUri=" + redirectUri
+                            + ", codeLength=" + authorizationCode.length()
+            );
         }
 
-        String accessToken = response.getBody().getAccessToken();
-        if (accessToken == null || accessToken.isBlank()) {
+        KakaoTokenResponse body = response.getBody();
+        if (body == null || body.getAccessToken() == null || body.getAccessToken().isBlank()) {
             throw new IllegalStateException("카카오 access_token 응답 누락");
         }
 
-        return accessToken;
+        return body.getAccessToken();
     }
 
     // 카카오 access token으로 사용자 정보 조회
     public KakaoUserInfo getUserInfo(String kakaoAccessToken) {
+        if (kakaoAccessToken == null || kakaoAccessToken.isBlank()) {
+            throw new IllegalArgumentException("kakaoAccessToken이 비어있습니다.");
+        }
+
         String meUrl = "https://kapi.kakao.com/v2/user/me";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(kakaoAccessToken);
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
 
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
@@ -83,7 +122,7 @@ public class KakaoClient {
         );
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new IllegalStateException("카카오 유저 조회 실패");
+            throw new IllegalStateException("카카오 유저 조회 실패 - status=" + response.getStatusCode());
         }
 
         KakaoMeResponse body = response.getBody();
@@ -104,7 +143,6 @@ public class KakaoClient {
             }
         }
 
-        // 이메일은 카카오 동의/설정에 따라 null 가능 → 임시 이메일 처리
         if (email == null || email.isBlank()) {
             email = "kakao_" + kakaoId + "@kakao.local";
         }
