@@ -12,7 +12,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.client.ClientHttpResponse;
-import java.io.IOException;
+
 
 @Component
 @RequiredArgsConstructor
@@ -31,7 +31,6 @@ public class KakaoClient {
 
     private RestTemplate createRestTemplate() {
         RestTemplate template = new RestTemplate();
-        // 4xx/5xx여도 예외로 던지지 말고 ResponseEntity로 받아서 바디 확인 가능하게
         template.setErrorHandler(new DefaultResponseErrorHandler() {
             @Override
             public boolean hasError(ClientHttpResponse response) {
@@ -50,7 +49,7 @@ public class KakaoClient {
         }
     }
 
-    // [기능] 인가코드로 카카오 access token 발급
+    // 인가코드로 카카오 access token 발급
     public String getAccessToken(String authorizationCode) {
         validateKakaoConfig();
 

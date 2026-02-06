@@ -2,6 +2,7 @@ package com.umc.timeto.auth.service;
 
 import com.umc.timeto.auth.client.KakaoClient;
 import com.umc.timeto.auth.dto.KakaoLoginResponse;
+import com.umc.timeto.auth.dto.TokenRefreshResponse;
 import com.umc.timeto.auth.dto.kakao.KakaoUserInfo;
 import com.umc.timeto.auth.entity.RefreshToken;
 import com.umc.timeto.auth.jwt.JwtProvider;
@@ -83,4 +84,30 @@ public class AuthService {
             KakaoLoginResponse response,
             boolean isNewMember
     ) { }
+
+    // accessToken 재발급
+    @Transactional
+    public TokenRefreshResponse refresh(String refreshToken) {
+        if (!jwtProvider.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
+
+        Long memberId = jwtProvider.getMemberId(refreshToken);
+
+        RefreshToken savedToken = refreshTokenRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+
+        System.out.println("requestRefreshToken = " + refreshToken);
+        System.out.println("dbRefreshToken = " + savedToken.getToken());
+        System.out.println("tokenEqual = " + savedToken.getToken().equals(refreshToken));
+
+        if (!savedToken.getToken().equals(refreshToken)) {
+            throw new IllegalArgumentException("Refresh token mismatch");
+        }
+
+        String newAccessToken = jwtProvider.createAccessToken(memberId);
+
+        return new TokenRefreshResponse(memberId, newAccessToken, refreshToken);
+    }
+
 }

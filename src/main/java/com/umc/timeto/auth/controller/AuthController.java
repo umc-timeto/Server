@@ -9,6 +9,7 @@ import com.umc.timeto.global.apiPayload.dto.ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.umc.timeto.auth.dto.TokenRefreshResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,5 +66,34 @@ public class AuthController {
                 .body(new ResponseDTO<>(ResponseCode.COMMON200, new LogoutResponse("로그아웃 성공")));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<ResponseDTO<TokenRefreshResponse>> refresh(
+            @RequestHeader(value = "Authorization", required = false) String authorization
+    ) {
+        System.out.println("Authorization header(raw) = [" + authorization + "]");
+        if (authorization != null) {
+            System.out.println("Authorization dotCount = " + authorization.chars().filter(c -> c=='.').count());
+        }
 
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return ResponseEntity
+                    .status(ResponseCode.COMMON401.getStatus())
+                    .body(new ResponseDTO<>(ResponseCode.COMMON401));
+        }
+
+        String refreshToken = authorization.substring(7).trim();
+
+        try {
+            TokenRefreshResponse response = authService.refresh(refreshToken);
+
+            return ResponseEntity
+                    .status(ResponseCode.AUTH200.getStatus())
+                    .body(new ResponseDTO<>(ResponseCode.AUTH200, response));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(ResponseCode.COMMON401.getStatus())
+                    .body(new ResponseDTO<>(ResponseCode.COMMON401));
+        }
+    }
 }
