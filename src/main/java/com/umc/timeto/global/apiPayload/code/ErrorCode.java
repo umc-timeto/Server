@@ -21,11 +21,13 @@ public enum ErrorCode {
     /**
      * 403 FORBIDDEN - 권한 없음
      */
+    GOAL_FORBIDDEN(HttpStatus.FORBIDDEN, "본인이 작성한 목표가 아닙니다."),
 
 
     /**
      * 404 NOT_FOUND - 요청한 리소스를 찾을 수 없음
      */
+    GOAL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 목표가 존재하지 않습니다."),
 
 
     /**
