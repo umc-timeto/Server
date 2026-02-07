@@ -2,9 +2,7 @@ package com.umc.timeto.global.config;
 
 import com.umc.timeto.auth.jwt.JwtFilter;
 import com.umc.timeto.auth.jwt.JwtProvider;
-import com.umc.timeto.member.repository.MemberRepository;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,41 +19,48 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
-    private final MemberRepository memberRepository;
+
+    public SecurityConfig(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
 
     @Getter
     private final List<String> requireAuthUrls = List.of(
-            "/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html",
-            "/swagger-ui/index.html", "/swagger-resources/**","/webjars/**"
+            "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+            "/swagger-ui/index.html", "/swagger-resources/**", "/webjars/**"
     );
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        JwtFilter jwtFilter = new JwtFilter(jwtProvider);
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "api/test").permitAll() // 로그인 경로 허용
-                        .requestMatchers(requireAuthUrls.toArray(new String[0])).permitAll() // Swagger 관련 URL 허용
-                        .anyRequest().authenticated() // 그 외는 인증 필요
+                        .requestMatchers(requireAuthUrls.toArray(new String[0])).permitAll()
+                        .anyRequest().permitAll() // 나중에 authenticated()로 변경
                 )
                 .formLogin(login -> login.disable())
                 .logout(logout -> logout.disable())
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 미사용
-                .addFilterBefore(new JwtFilter(jwtProvider, memberRepository),
-                UsernamePasswordAuthenticationFilter.class);
+
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        var cfg = new CorsConfiguration();
+        CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(List.of(
-                "http://localhost:5173", "http://localhost:3000", "http://localhost:8080"
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "http://localhost:8080"
         ));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
@@ -63,7 +68,7 @@ public class SecurityConfig {
         cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
 
-        var src = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", cfg);
         return src;
     }
