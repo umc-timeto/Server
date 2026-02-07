@@ -50,4 +50,23 @@ public class JwtProvider {
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    // 토큰에서 memberId 추출
+    public Long getMemberId(String token) {
+        String subject = Jwts.parserBuilder()
+                .setSigningKey(signingKey)
+                .build()
+                .parseClaimsJws(token).getBody().getSubject();
+        return Long.parseLong(subject);
+    }
+
+    // 토큰 유효성 검증
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
