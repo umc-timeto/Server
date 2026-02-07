@@ -21,6 +21,7 @@ public enum ErrorCode {
     /**
      * 403 FORBIDDEN - 권한 없음
      */
+    GOAL_FORBIDDEN(HttpStatus.FORBIDDEN, "본인이 작성한 목표가 아닙니다."),
 
 
     /**
