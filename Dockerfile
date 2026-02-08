@@ -15,6 +15,9 @@ RUN chmod +x gradlew
 # 소스 복사
 COPY . .
 
+# gradlew 권한/개행 문제 해결
+RUN sed -i 's/\r$//' gradlew && chmod 755 gradlew
+
 # 빌드 (배포 시 테스트 스킵)
 RUN ./gradlew clean bootJar -x test
 
