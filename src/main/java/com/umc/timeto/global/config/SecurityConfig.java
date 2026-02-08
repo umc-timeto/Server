@@ -44,7 +44,9 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(requireAuthUrls.toArray(new String[0])).permitAll()
-                        .anyRequest().permitAll() // 나중에 authenticated()로 변경
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(login -> login.disable())
                 .logout(logout -> logout.disable())
