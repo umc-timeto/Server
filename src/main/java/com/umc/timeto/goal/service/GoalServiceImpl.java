@@ -10,10 +10,11 @@ import com.umc.timeto.goal.dto.GoalUpdateDTO;
 import com.umc.timeto.goal.entity.Goal;
 import com.umc.timeto.goal.repository.GoalRepository;
 import com.umc.timeto.member.entity.Member;
+import com.umc.timeto.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,13 +22,17 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class GoalServiceImpl implements GoalService{
+public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
+    private final MemberRepository memberRepository;
 
     // 목표 생성
     @Override
-     public ResponseEntity<?> addGoal(GoalAddReqDTO dto, Member member) {
+    public ResponseEntity<?> addGoal(GoalAddReqDTO dto, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
+
         Goal goal = Goal.builder()
                 .name(dto.getName())
                 .color(dto.getColor())
@@ -43,7 +48,10 @@ public class GoalServiceImpl implements GoalService{
     // 본인의 목표 목록 조회
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<?> getGoalList(Member member) {
+    public ResponseEntity<?> getGoalList(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
+
         List<GoalResponseDTO> res = goalRepository.findALlByMember(member).stream()
                 .map(goal -> GoalResponseDTO.builder()
                         .id(goal.getId())
@@ -59,7 +67,10 @@ public class GoalServiceImpl implements GoalService{
 
     // 목표 수정
     @Override
-    public ResponseEntity<?> updateGoal(Long goalId, GoalUpdateDTO dto, Member member) {
+    public ResponseEntity<?> updateGoal(Long goalId, GoalUpdateDTO dto, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
+
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
 
@@ -69,8 +80,12 @@ public class GoalServiceImpl implements GoalService{
         }
 
         // 부분 업데이트
-        if (dto.getName() != null) goal.setName(dto.getName());
-        if (dto.getColor() != null) goal.setColor(dto.getColor());
+        if (dto.getName() != null) {
+            goal.setName(dto.getName());
+        }
+        if (dto.getColor() != null) {
+            goal.setColor(dto.getColor());
+        }
 
         goalRepository.save(goal); // 변경 사항 저장
 
@@ -84,10 +99,12 @@ public class GoalServiceImpl implements GoalService{
                 .body(new ResponseDTO<>(ResponseCode.SUCCESS_UPDATE_GOAL, res));
     }
 
-
-    // 4. 목표 삭제 (Delete)
+    // 목표 삭제 (Delete)
     @Override
-    public ResponseEntity<?> deleteGoal(Long goalId, Member member) {
+    public ResponseEntity<?> deleteGoal(Long goalId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
+
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
 
