@@ -1,15 +1,12 @@
 package com.umc.timeto.auth.controller;
 
-import com.umc.timeto.auth.dto.KakaoLoginRequest;
-import com.umc.timeto.auth.dto.KakaoLoginResponse;
-import com.umc.timeto.auth.dto.LogoutResponse;
+import com.umc.timeto.auth.dto.*;
 import com.umc.timeto.auth.service.AuthService;
 import com.umc.timeto.global.apiPayload.code.ResponseCode;
 import com.umc.timeto.global.apiPayload.dto.ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.umc.timeto.auth.dto.TokenRefreshResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -68,23 +65,18 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<ResponseDTO<TokenRefreshResponse>> refresh(
-            @RequestHeader(value = "Authorization", required = false) String authorization
+            @RequestBody TokenRefreshRequest request
     ) {
-        System.out.println("Authorization header(raw) = [" + authorization + "]");
-        if (authorization != null) {
-            System.out.println("Authorization dotCount = " + authorization.chars().filter(c -> c=='.').count());
-        }
+        String refreshToken = request.refreshToken();
 
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        if (refreshToken == null || refreshToken.isBlank()) {
             return ResponseEntity
                     .status(ResponseCode.COMMON401.getStatus())
                     .body(new ResponseDTO<>(ResponseCode.COMMON401));
         }
 
-        String refreshToken = authorization.substring(7).trim();
-
         try {
-            TokenRefreshResponse response = authService.refresh(refreshToken);
+            TokenRefreshResponse response = authService.refresh(refreshToken.trim());
 
             return ResponseEntity
                     .status(ResponseCode.AUTH200.getStatus())
@@ -96,4 +88,5 @@ public class AuthController {
                     .body(new ResponseDTO<>(ResponseCode.COMMON401));
         }
     }
+
 }
