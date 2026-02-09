@@ -26,7 +26,7 @@ public enum ErrorCode {
     /**
      * 404 NOT_FOUND - 요청한 리소스를 찾을 수 없음
      */
-
+    NOT_FOUND(HttpStatus.NOT_FOUND,"요청하신걸 찾을 수 없습니다."),
 
     /**
      * 406 NOT_ACCEPTABLE - 허용되지 않는 요청 형식
