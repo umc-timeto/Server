@@ -9,8 +9,6 @@ import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.exception.GlobalException;
 import com.umc.timeto.goal.entity.Goal;
 import com.umc.timeto.goal.repository.GoalRepository;
-import com.umc.timeto.member.entity.Member;
-import com.umc.timeto.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,18 +23,14 @@ public class FolderServiceImpl implements FolderService {
 
     private final FolderRepository folderRepository;
     private final GoalRepository goalRepository;
-    private final MemberRepository memberRepository;
 
     @Override
     public FolderResponseDTO addFolder(Long goalId, FolderAddDTO dto, Long memberId) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.FOLDER_NOT_FOUND));
-
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
 
-        if (!goal.getMember().getMemberId().equals(member.getMemberId())) {
+        if (!goal.getMember().getMemberId().equals(memberId)){
             throw new GlobalException(ErrorCode.GOAL_FORBIDDEN);
         }
 
