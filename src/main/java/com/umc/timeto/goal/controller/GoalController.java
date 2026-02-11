@@ -1,13 +1,19 @@
 package com.umc.timeto.goal.controller;
 
+import com.umc.timeto.global.apiPayload.code.ResponseCode;
+import com.umc.timeto.global.apiPayload.dto.ResponseDTO;
 import com.umc.timeto.goal.dto.GoalAddReqDTO;
+import com.umc.timeto.goal.dto.GoalResponseDTO;
 import com.umc.timeto.goal.dto.GoalUpdateDTO;
 import com.umc.timeto.goal.service.GoalService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,11 +29,15 @@ public class GoalController {
     )
     @PostMapping
     public ResponseEntity<?> addGoal(
-            @RequestBody GoalAddReqDTO dto,
+            @RequestBody @Valid GoalAddReqDTO dto,
             Authentication authentication
     ) {
         Long memberId = (Long) authentication.getPrincipal();
-        return goalService.addGoal(dto, memberId);
+        GoalResponseDTO result = goalService.addGoal(dto, memberId);
+
+        return ResponseEntity
+                .status(ResponseCode.SUCCESS_ADD_GOAL.getStatus().value())
+                .body(new ResponseDTO<>(ResponseCode.SUCCESS_ADD_GOAL, result));
     }
 
     // 목표 리스트 조회
@@ -38,7 +48,11 @@ public class GoalController {
     @GetMapping("/list")
     public ResponseEntity<?> getGoalList(Authentication authentication) {
         Long memberId = (Long) authentication.getPrincipal();
-        return goalService.getGoalList(memberId);
+        List<GoalResponseDTO> result = goalService.getGoalList(memberId);
+
+        return ResponseEntity
+                .status(ResponseCode.SUCCESS_GET_GOALLIST.getStatus().value())
+                .body(new ResponseDTO<>(ResponseCode.SUCCESS_GET_GOALLIST, result));
     }
 
     // 목표 수정
@@ -49,11 +63,15 @@ public class GoalController {
     @PatchMapping("/{goalId}")
     public ResponseEntity<?> updateGoal(
             @PathVariable Long goalId,
-            @RequestBody GoalUpdateDTO dto,
+            @RequestBody @Valid GoalUpdateDTO dto,
             Authentication authentication
     ) {
         Long memberId = (Long) authentication.getPrincipal();
-        return goalService.updateGoal(goalId, dto, memberId);
+        GoalResponseDTO result = goalService.updateGoal(goalId, dto, memberId);
+
+        return ResponseEntity
+                .status(ResponseCode.SUCCESS_UPDATE_GOAL.getStatus().value())
+                .body(new ResponseDTO<>(ResponseCode.SUCCESS_UPDATE_GOAL, result));
     }
 
     // 목표 삭제
@@ -67,6 +85,10 @@ public class GoalController {
             Authentication authentication
     ) {
         Long memberId = (Long) authentication.getPrincipal();
-        return goalService.deleteGoal(goalId, memberId);
+        goalService.deleteGoal(goalId, memberId);
+
+        return ResponseEntity
+                .status(ResponseCode.SUCCESS_DELETE_GOAL.getStatus().value())
+                .body(new ResponseDTO<>(ResponseCode.SUCCESS_DELETE_GOAL, null));
     }
 }

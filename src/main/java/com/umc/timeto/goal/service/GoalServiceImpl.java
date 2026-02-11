@@ -29,9 +29,9 @@ public class GoalServiceImpl implements GoalService {
 
     // 목표 생성
     @Override
-    public ResponseEntity<?> addGoal(GoalAddReqDTO dto, Long memberId) {
+    public GoalResponseDTO addGoal(GoalAddReqDTO dto, Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND));
 
         Goal goal = Goal.builder()
                 .name(dto.getName())
@@ -39,71 +39,60 @@ public class GoalServiceImpl implements GoalService {
                 .member(member)
                 .build();
 
-        goalRepository.save(goal);
+        Goal savedGoal = goalRepository.save(goal);
 
-        return ResponseEntity.status(ResponseCode.SUCCESS_ADD_GOAL.getStatus().value())
-                .body(new ResponseDTO<>(ResponseCode.SUCCESS_ADD_GOAL, dto));
+        return GoalResponseDTO.builder()
+                .id(savedGoal.getId())
+                .name(savedGoal.getName())
+                .color(savedGoal.getColor())
+                .build();
     }
 
     // 본인의 목표 목록 조회
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<?> getGoalList(Long memberId) {
+    public List<GoalResponseDTO> getGoalList(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND));
 
-        List<GoalResponseDTO> res = goalRepository.findALlByMember(member).stream()
+        return goalRepository.findALlByMember(member).stream()
                 .map(goal -> GoalResponseDTO.builder()
                         .id(goal.getId())
                         .name(goal.getName())
                         .color(goal.getColor())
                         .build())
                 .collect(Collectors.toList());
-
-        return ResponseEntity
-                .status(ResponseCode.SUCCESS_GET_GOALLIST.getStatus().value())
-                .body(new ResponseDTO<>(ResponseCode.SUCCESS_GET_GOALLIST, res));
     }
 
     // 목표 수정
     @Override
-    public ResponseEntity<?> updateGoal(Long goalId, GoalUpdateDTO dto, Long memberId) {
+    public GoalResponseDTO updateGoal(Long goalId, GoalUpdateDTO dto, Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND));
 
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
 
-        // 본인 확인: 목표의 주인 ID와 현재 로그인한 유저 ID 비교
+        // 본인 확인
         if (!goal.getMember().getMemberId().equals(member.getMemberId())) {
             throw new GlobalException(ErrorCode.GOAL_FORBIDDEN);
         }
 
-        // 부분 업데이트
-        if (dto.getName() != null) {
-            goal.setName(dto.getName());
-        }
-        if (dto.getColor() != null) {
-            goal.setColor(dto.getColor());
-        }
+        if (dto.getName() != null) goal.setName(dto.getName());
+        if (dto.getColor() != null) goal.setColor(dto.getColor());
 
-        goalRepository.save(goal); // 변경 사항 저장
-
-        GoalResponseDTO res = GoalResponseDTO.builder()
+        return GoalResponseDTO.builder()
                 .id(goal.getId())
                 .name(goal.getName())
                 .color(goal.getColor())
                 .build();
-
-        return ResponseEntity.status(ResponseCode.SUCCESS_UPDATE_GOAL.getStatus().value())
-                .body(new ResponseDTO<>(ResponseCode.SUCCESS_UPDATE_GOAL, res));
     }
 
-    // 목표 삭제 (Delete)
+    // 목표 삭제
     @Override
-    public ResponseEntity<?> deleteGoal(Long goalId, Long memberId) {
+    public Long deleteGoal(Long goalId, Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND));
 
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.GOAL_NOT_FOUND));
@@ -114,9 +103,6 @@ public class GoalServiceImpl implements GoalService {
         }
 
         goalRepository.delete(goal);
-
-        return ResponseEntity
-                .status(ResponseCode.SUCCESS_DELETE_GOAL.getStatus().value())
-                .body(new ResponseDTO<>(ResponseCode.SUCCESS_DELETE_GOAL, null));
+        return goalId;
     }
 }
