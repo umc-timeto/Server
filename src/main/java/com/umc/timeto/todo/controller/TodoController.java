@@ -15,6 +15,7 @@ import com.umc.timeto.todo.service.TodoService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,7 +31,10 @@ public class TodoController {
     @Operation(summary = "할 일 정보 조회", description = "todoId로 할 일 상세 정보를 조회합니다.")
     @GetMapping("/{todoId}")
     public ResponseDTO<TodoGetResponse> getTodo(@PathVariable Long todoId) {
-        TodoGetResponse data = todoQueryService.getTodo(todoId);
+        Long memberId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        TodoGetResponse data = todoQueryService.getTodo(memberId, todoId);
         return new ResponseDTO<>(ResponseCode.COMMON200, data);
     }
 
@@ -40,7 +44,10 @@ public class TodoController {
             @PathVariable Long todoId,
             @RequestBody @Valid TodoStatusUpdateRequest request
     ) {
-        TodoStatusUpdateResponse data = todoCommandService.updateStatus(todoId, request);
+        Long memberId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        TodoStatusUpdateResponse data = todoCommandService.updateStatus(memberId, todoId, request);
         return new ResponseDTO<>(ResponseCode.COMMON200, data);
     }
 
@@ -50,7 +57,10 @@ public class TodoController {
             @PathVariable Long folderId,
             @RequestBody @Valid TodoCreateRequest request
     ) {
-        TodoCreateResponse data = todoService.createTodo(folderId, request);
+        Long memberId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        TodoCreateResponse data = todoService.createTodo(memberId, folderId, request);
 
         // TODO_CREATED가 없으면 COMMON200으로 바꿔도 됨
         return new ResponseDTO<>(ResponseCode.COMMON200, data);
@@ -62,29 +72,41 @@ public class TodoController {
             @PathVariable Long todoId,
             @RequestBody @Valid TodoUpdateRequest request
     ) {
-        TodoGetResponse result = todoCommandService.updateTodo(todoId, request);
+        Long memberId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        TodoGetResponse result = todoCommandService.updateTodo(memberId, todoId, request);
         return new ResponseDTO<>(ResponseCode.COMMON200, result);
     }
 
     @Operation(summary = "진행 중인 할 일 리스트", description = "folderId로 해당 폴더에 진행중인 할 일을 조회합니다.")
     @GetMapping("/{folderId}/todo/progress")
     public ResponseDTO<TodoIngListResponse> getInProgressTodos(@PathVariable Long folderId) {
+        Long memberId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-        TodoIngListResponse result = todoQueryService.getInProgressTodos(folderId);
+        TodoIngListResponse result = todoQueryService.getInProgressTodos(memberId, folderId);
         return new ResponseDTO<>(ResponseCode.COMMON200, result);
     }
 
     @Operation(summary = "완료된 할 일 리스트", description = "folderId로 해당 폴더에 완료된 할 일을 조회합니다.")
     @GetMapping("/{folderId}/todo/complete")
     public ResponseDTO<TodoIngListResponse> getCompleteTodos(@PathVariable Long folderId) {
-        TodoIngListResponse result = todoQueryService.getCompleteTodos(folderId);
+        Long memberId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        TodoIngListResponse result = todoQueryService.getCompleteTodos(memberId, folderId);
         return new ResponseDTO<>(ResponseCode.COMMON200, result);
     }
 
     @Operation(summary = "할 일 삭제", description = "할 일을 삭제합니다.")
     @DeleteMapping("/{todoId}")
     public ResponseDTO<String> deleteTodo(@PathVariable Long todoId) {
-        todoCommandService.deleteTodo(todoId);
+        Long memberId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        todoCommandService.deleteTodo(memberId, todoId);
         return new ResponseDTO<>(ResponseCode.COMMON200, "성공");
     }
 }

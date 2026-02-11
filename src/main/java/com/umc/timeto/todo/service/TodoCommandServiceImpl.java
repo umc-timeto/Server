@@ -1,5 +1,6 @@
 package com.umc.timeto.todo.service;
 
+import com.umc.timeto.folder.repository.FolderRepository;
 import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.exception.GlobalException;
 import com.umc.timeto.todo.domain.Todo;
@@ -21,11 +22,12 @@ import java.time.LocalTime;
 @Transactional
 public class TodoCommandServiceImpl implements TodoCommandService{
     private final TodoRepository todoRepository;
+    private final FolderRepository folderRepository;
 
     @Override
-    public TodoStatusUpdateResponse updateStatus(Long todoId, TodoStatusUpdateRequest request) {
+    public TodoStatusUpdateResponse updateStatus(Long memberId,Long todoId, TodoStatusUpdateRequest request) {
 
-        Todo todo = todoRepository.findById(todoId)
+        Todo todo = todoRepository.findByTodoIdAndFolder_Goal_Member_MemberId(todoId,memberId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.TODO_NOT_FOUND)); // 너희 ErrorCode로 교체
 
         todo.changeState(request.getState());
@@ -36,9 +38,9 @@ public class TodoCommandServiceImpl implements TodoCommandService{
         );
     }
     @Override
-    public TodoGetResponse updateTodo(Long todoId, TodoUpdateRequest request) {
+    public TodoGetResponse updateTodo(Long memberId, Long todoId, TodoUpdateRequest request) {
 
-        Todo todo = todoRepository.findById(todoId)
+        Todo todo = todoRepository.findByTodoIdAndFolder_Goal_Member_MemberId(todoId, memberId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.TODO_NOT_FOUND));
 
         // ✅ 부분 업데이트: 들어온 것만 반영
@@ -64,11 +66,12 @@ public class TodoCommandServiceImpl implements TodoCommandService{
         );
     }
     @Override
-    public void deleteTodo(Long todoId) {
-        Todo todo = todoRepository.findById(todoId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.TODO_NOT_FOUND));
-
-        todoRepository.delete(todo);
-        // 또는 todoRepository.deleteById(todoId); (존재 검사 없이 바로 삭제하고 싶으면)
+    @Transactional
+    public void deleteTodo(Long memberId, Long todoId) {
+        boolean exists = todoRepository.existsByTodoIdAndFolder_Goal_Member_MemberId(todoId, memberId);
+        if (!exists) {
+            throw new GlobalException(ErrorCode.TODO_NOT_FOUND);
+        }
+        todoRepository.deleteByTodoIdAndFolder_Goal_Member_MemberId(todoId, memberId);
     }
 }

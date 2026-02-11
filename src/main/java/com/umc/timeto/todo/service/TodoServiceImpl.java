@@ -1,5 +1,7 @@
 package com.umc.timeto.todo.service;
 
+import com.umc.timeto.folder.entity.Folder;
+import com.umc.timeto.folder.repository.FolderRepository;
 import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.exception.GlobalException;
 import com.umc.timeto.todo.domain.Todo;
@@ -18,18 +20,18 @@ import java.time.LocalTime;
 @Transactional
 public class TodoServiceImpl implements TodoService {
     private final TodoRepository todoRepository;
+    private final FolderRepository folderRepository;
 
     @Override
-    public TodoCreateResponse createTodo(Long folderId, TodoCreateRequest request) {
+    public TodoCreateResponse createTodo(Long memberId, Long folderId, TodoCreateRequest request) {
 
-        if (folderId == null || folderId <= 0) {
-            // 프로젝트 ErrorCode에 맞게 교체
-            throw new GlobalException(ErrorCode.BAD_REQUEST);
-        }
+        Folder folder = folderRepository.findByFolderIdAndGoal_Member_MemberId(folderId, memberId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.FOLDER_NOT_FOUND)); // 권한도 NOT_FOUND로 숨김
+
 
         LocalTime duration = DurationParser.parseToLocalTime(request.getDuration());
 
-        Todo todo = Todo.create(folderId, request.getName(), request.getPriority(), duration);
+        Todo todo = Todo.create(folder, request.getName(), request.getPriority(), duration);
         Todo saved = todoRepository.save(todo);
 
         return new TodoCreateResponse(saved.getTodoId());

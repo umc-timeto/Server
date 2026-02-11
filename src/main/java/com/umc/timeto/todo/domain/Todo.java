@@ -1,6 +1,7 @@
 package com.umc.timeto.todo.domain;
 
 
+import com.umc.timeto.folder.entity.Folder;
 import com.umc.timeto.todo.domain.enums.TodoPriority;
 import com.umc.timeto.todo.domain.enums.TodoState;
 import jakarta.persistence.*;
@@ -43,13 +44,14 @@ public class Todo {
     private LocalDateTime startAt;
 
     // ✅ 지금은 연관관계 없이 숫자 FK만 들고감
-    @Column(name = "folder_id", nullable = false)
-    private Long folderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "folder_id", nullable = false)
+    private Folder folder;
 
 
-    public static Todo create(Long folderId, String name, TodoPriority priority, LocalTime duration) {
+    public static Todo create(Folder folder, String name, TodoPriority priority, LocalTime duration) {
         Todo todo = new Todo();
-        todo.folderId = folderId;
+        todo.folder = folder;
         todo.name = name;
         todo.priority = priority;
         todo.duration = duration;

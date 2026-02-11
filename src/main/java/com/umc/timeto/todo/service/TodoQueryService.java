@@ -4,7 +4,7 @@ import com.umc.timeto.todo.dto.response.TodoGetResponse;
 import com.umc.timeto.todo.dto.response.TodoIngListResponse;
 
 public interface TodoQueryService {
-    TodoGetResponse getTodo(Long todoId);
-    TodoIngListResponse getInProgressTodos(Long folderId);
-    TodoIngListResponse getCompleteTodos(Long folderId);
+    TodoGetResponse getTodo(Long memberId, Long todoId);
+    TodoIngListResponse getInProgressTodos(Long memberId, Long folderId);
+    TodoIngListResponse getCompleteTodos(Long memberId, Long folderId);
 }

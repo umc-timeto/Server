@@ -6,8 +6,8 @@ import com.umc.timeto.todo.dto.response.TodoGetResponse;
 import com.umc.timeto.todo.dto.response.TodoStatusUpdateResponse;
 
 public interface TodoCommandService {
-    TodoStatusUpdateResponse updateStatus(Long todoId, TodoStatusUpdateRequest request);
-    TodoGetResponse updateTodo(Long todoId, TodoUpdateRequest request);
-    void deleteTodo(Long todoId);
+    TodoStatusUpdateResponse updateStatus(Long memberId, Long todoId, TodoStatusUpdateRequest request);
+    TodoGetResponse updateTodo(Long memberId, Long todoId, TodoUpdateRequest request);
+    void deleteTodo(Long memberId, Long todoId);
 }
 
