@@ -12,6 +12,8 @@ import lombok.*;
 @NoArgsConstructor
 public class Goal {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "goal_id")
     private Long id;
 
     private String name;
