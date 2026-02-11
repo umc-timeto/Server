@@ -27,7 +27,13 @@ public enum ResponseCode {
 
     // Auth
     AUTH_LOGIN_SUCCESS(HttpStatus.OK, "로그인에 성공하였습니다."),
-
+    
+    // DailyLog
+    SUCCESS_SAVE_LOG(HttpStatus.CREATED, "일지를 성공적으로 저장했습니다."),
+    SUCCESS_GET_MONTHLY_LOGS(HttpStatus.OK, "월별 일지를 성공적으로 조회했습니다."),
+    SUCCESS_GET_DAILY_LOGS(HttpStatus.OK, "일별 일지를 성공적으로 조회했습니다."),
+    SUCCESS_UPDATE_LOG(HttpStatus.OK, "일지를 성공적으로 수정했습니다."),
+    SUCCESS_DELETE_LOG(HttpStatus.OK, "일지를 성공적으로 삭제했습니다."),
     ;
 
     private final HttpStatus status;
