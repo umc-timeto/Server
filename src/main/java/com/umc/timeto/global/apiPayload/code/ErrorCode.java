@@ -28,7 +28,8 @@ public enum ErrorCode {
      * 404 NOT_FOUND - 요청한 리소스를 찾을 수 없음
      */
     GOAL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 목표가 존재하지 않습니다."),
-    TODO_NOT_FOUND(HttpStatus.NOT_FOUND,"요청하신걸 찾을 수 없습니다."),
+    FOLDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 폴더가 존재하지 않습니다."),
+    TODO_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 아이디를 가진 할 일이 존재하지 않습니다."),
 
 
     /**
