@@ -30,6 +30,8 @@ public enum ErrorCode {
      */
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 유저가 존재하지 않습니다."),
     GOAL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 목표가 존재하지 않습니다."),
+    FOLDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 폴더가 존재하지 않습니다."),
+    TODO_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 아이디를 가진 할 일이 존재하지 않습니다."),
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 일지가 존재하지 않습니다."),
 
 
