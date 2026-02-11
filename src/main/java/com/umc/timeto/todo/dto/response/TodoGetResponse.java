@@ -5,6 +5,8 @@ import com.umc.timeto.todo.domain.enums.TodoState;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 public class TodoGetResponse {
@@ -13,4 +15,5 @@ public class TodoGetResponse {
     private String duration;     // "1H 30M" 형태로 내려줌
     private TodoPriority priority;
     private TodoState state;
+    private LocalDateTime startAt;
 }
