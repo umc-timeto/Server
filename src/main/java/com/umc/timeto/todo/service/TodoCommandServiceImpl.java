@@ -1,9 +1,5 @@
 package com.umc.timeto.todo.service;
-
-import com.umc.timeto.block.entity.Block;
-import com.umc.timeto.block.repository.BlockRepository;
 import com.umc.timeto.block.service.BlockService;
-import com.umc.timeto.folder.repository.FolderRepository;
 import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.exception.GlobalException;
 import com.umc.timeto.todo.domain.Todo;
@@ -19,14 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TodoCommandServiceImpl implements TodoCommandService{
     private final TodoRepository todoRepository;
-    private final FolderRepository folderRepository;
     private final BlockService blockService;
 
     @Override

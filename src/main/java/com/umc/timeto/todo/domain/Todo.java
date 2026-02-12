@@ -54,8 +54,7 @@ public class Todo {
     @OneToOne(
             mappedBy = "todo",
             cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
+            orphanRemoval = true
     )
     private Block block;
 

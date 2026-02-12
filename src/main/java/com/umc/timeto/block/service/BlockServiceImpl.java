@@ -48,7 +48,7 @@ public class BlockServiceImpl implements BlockService {
 
         List<Block> overlaps =
                 blockRepository
-                        .findByTodo_Folder_Member_MemberIdAndStartAtLessThanAndEndAtGreaterThan(
+                        .findByTodo_Folder_Goal_Member_MemberIdAndStartAtLessThanAndEndAtGreaterThan(
                                 memberId,
                                 endAt,
                                 startAt
@@ -75,7 +75,7 @@ public class BlockServiceImpl implements BlockService {
 
         List<Block> blocks =
                 blockRepository
-                        .findByTodo_Folder_Member_MemberIdAndStartAtBetween(
+                        .findByTodo_Folder_Goal_Member_MemberIdAndStartAtBetween(
                                 memberId,
                                 start,
                                 end
@@ -100,7 +100,7 @@ public class BlockServiceImpl implements BlockService {
                 .atStartOfDay();
 
         List<Block> blocks =
-                blockRepository.findByTodo_Folder_Member_MemberIdAndStartAtGreaterThanEqualAndStartAtLessThan(
+                blockRepository.findByTodo_Folder_Goal_Member_MemberIdAndStartAtGreaterThanEqualAndStartAtLessThan(
                         memberId,
                         start,
                         nextMonthStart
@@ -124,7 +124,7 @@ public class BlockServiceImpl implements BlockService {
     public BlockResponseDTO updateBlockDuration(Long blockId, Long memberId, LocalTime newDuration) {
 
         Block block = blockRepository
-                .findByBlockIdAndTodo_Folder_Member_MemberId(blockId, memberId)
+                .findByBlockIdAndTodo_Folder_Goal_Member_MemberId(blockId, memberId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.BLOCK_NOT_FOUND));
 
         LocalDateTime newStart = block.getStartAt();
@@ -135,7 +135,7 @@ public class BlockServiceImpl implements BlockService {
 
         List<Block> overlaps =
                 blockRepository
-                        .findByTodo_Folder_Member_MemberIdAndBlockIdNotAndStartAtLessThanAndEndAtGreaterThan(
+                        .findByTodo_Folder_Goal_Member_MemberIdAndBlockIdNotAndStartAtLessThanAndEndAtGreaterThan(
                                 memberId,
                                 blockId,
                                 newEnd,
@@ -189,7 +189,7 @@ public class BlockServiceImpl implements BlockService {
             // 충돌 검사
             List<Block> overlaps =
                     blockRepository
-                            .findByTodo_Folder_Member_MemberIdAndBlockIdNotAndStartAtLessThanAndEndAtGreaterThan(
+                            .findByTodo_Folder_Goal_Member_MemberIdAndBlockIdNotAndStartAtLessThanAndEndAtGreaterThan(
                                     memberId,
                                     block.getBlockId(),
                                     newEnd,
@@ -218,7 +218,7 @@ public class BlockServiceImpl implements BlockService {
     public BlockResponseDTO moveBlock(Long blockId, Long memberId, LocalDateTime newStart) {
 
         Block block = blockRepository
-                .findByBlockIdAndTodo_Folder_Member_MemberId(blockId, memberId)
+                .findByBlockIdAndTodo_Folder_Goal_Member_MemberId(blockId, memberId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.BLOCK_NOT_FOUND));
 
         LocalTime duration = block.getTodo().getDuration();
@@ -230,7 +230,7 @@ public class BlockServiceImpl implements BlockService {
 
         List<Block> overlaps =
                 blockRepository
-                        .findByTodo_Folder_Member_MemberIdAndBlockIdNotAndStartAtLessThanAndEndAtGreaterThan(
+                        .findByTodo_Folder_Goal_Member_MemberIdAndBlockIdNotAndStartAtLessThanAndEndAtGreaterThan(
                                 memberId,
                                 blockId,
                                 newEnd,
