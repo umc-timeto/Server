@@ -1,6 +1,7 @@
 package com.umc.timeto.todo.domain;
 
 
+import com.umc.timeto.block.entity.Block;
 import com.umc.timeto.folder.entity.Folder;
 import com.umc.timeto.todo.domain.enums.TodoPriority;
 import com.umc.timeto.todo.domain.enums.TodoState;
@@ -49,6 +50,17 @@ public class Todo {
     private Folder folder;
 
 
+    //todo 삭제 시 연결된 block 자동 삭제
+    @OneToOne(
+            mappedBy = "todo",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private Block block;
+
+
+
     public static Todo create(Folder folder, String name, TodoPriority priority, LocalTime duration) {
         Todo todo = new Todo();
         todo.folder = folder;
@@ -67,5 +79,7 @@ public class Todo {
     public void changeName(String name) { this.name = name; }
     public void changePriority(TodoPriority priority) { this.priority = priority; }
     public void changeDuration(LocalTime duration) { this.duration = duration; }
+
+    public void updateStartAt(LocalDateTime startAt) { this.startAt = startAt;}
 
 }

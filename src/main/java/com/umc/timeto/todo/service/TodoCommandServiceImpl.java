@@ -1,5 +1,8 @@
 package com.umc.timeto.todo.service;
 
+import com.umc.timeto.block.entity.Block;
+import com.umc.timeto.block.repository.BlockRepository;
+import com.umc.timeto.block.service.BlockService;
 import com.umc.timeto.folder.repository.FolderRepository;
 import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.exception.GlobalException;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +27,7 @@ import java.time.LocalTime;
 public class TodoCommandServiceImpl implements TodoCommandService{
     private final TodoRepository todoRepository;
     private final FolderRepository folderRepository;
+    private final BlockService blockService;
 
     @Override
     public TodoStatusUpdateResponse updateStatus(Long memberId,Long todoId, TodoStatusUpdateRequest request) {
@@ -51,10 +56,10 @@ public class TodoCommandServiceImpl implements TodoCommandService{
         if (request.getPriority() != null) {
             todo.changePriority(request.getPriority());
         }
-
+        // duration 변경 시 Block이 처리
         if (request.getDuration() != null && !request.getDuration().isBlank()) {
             LocalTime parsed = DurationParser.parseToLocalTime(request.getDuration());
-            todo.changeDuration(parsed);
+            blockService.updateBlockDurationByTodo(todoId, memberId, parsed);
         }
 
         return new TodoGetResponse(

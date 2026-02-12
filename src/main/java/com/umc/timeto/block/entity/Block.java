@@ -18,7 +18,7 @@ public class Block {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long blockId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "todo_id")
     private Todo todo;
 
@@ -38,4 +38,10 @@ public class Block {
                 .plusMinutes(duration.getMinute())
                 .plusSeconds(duration.getSecond());
     }
+
+    public void updateTime(LocalDateTime startAt, LocalDateTime endAt) {
+        this.startAt = startAt;
+        this.endAt = endAt;
+    }
+
 }

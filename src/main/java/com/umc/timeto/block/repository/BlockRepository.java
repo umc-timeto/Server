@@ -5,8 +5,36 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface BlockRepository extends JpaRepository<Block, Long> {
-    List<Block> findByStartAtBetween(LocalDateTime start, LocalDateTime end);
-    List<Block> findByStartAtGreaterThanEqualAndStartAtLessThan(LocalDateTime start, LocalDateTime nextMonthStart);
+    Optional<Block> findByTodo_TodoId(Long todoId);
+
+
+    List<Block> findByTodo_Folder_Member_MemberIdAndStartAtBetween(
+            Long memberId,
+            LocalDateTime start,
+            LocalDateTime end
+    );
+    List<Block> findByTodo_Folder_Member_MemberIdAndStartAtGreaterThanEqualAndStartAtLessThan(
+            Long memberId,
+            LocalDateTime start,
+            LocalDateTime end
+    );
+
+
+    List<Block> findByTodo_Folder_Member_MemberIdAndStartAtLessThanAndEndAtGreaterThan(
+            Long memberId,
+            LocalDateTime endAt,
+            LocalDateTime startAt
+    );
+
+    List<Block> findByTodo_Folder_Member_MemberIdAndBlockIdNotAndStartAtLessThanAndEndAtGreaterThan(
+            Long memberId,
+            Long blockId,
+            LocalDateTime endAt,
+            LocalDateTime startAt
+    );
+
+    Optional<Block> findByBlockIdAndTodo_Folder_Member_MemberId(Long blockId, Long memberId);
 }

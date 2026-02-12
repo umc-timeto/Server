@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -71,5 +73,47 @@ public class BlockController {
                 .status(ResponseCode.SUCCESS_GET_BLOCK_NUMBER.getStatus().value())
                 .body(new ResponseDTO<>(ResponseCode.SUCCESS_GET_BLOCK_NUMBER, res));
     }
+
+    @PatchMapping("/{blockId}/duration")
+    public ResponseEntity<ResponseDTO<Void>> updateDuration(
+            @PathVariable Long blockId,
+            @RequestParam LocalTime duration,
+            Authentication authentication
+    ) {
+
+        blockService.updateBlockDuration(
+                blockId,
+                getMemberId(authentication),
+                duration
+        );
+
+        return ResponseEntity.ok(
+                new ResponseDTO<>(ResponseCode.SUCCESS_UPDATE_BLOCK, null)
+        );
+    }
+
+
+    @PatchMapping("/{blockId}/move")
+    public ResponseEntity<ResponseDTO<Void>> moveBlock(
+            @PathVariable Long blockId,
+            @RequestParam
+            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+            LocalDateTime startAt,
+            Authentication authentication
+    ) {
+
+        blockService.moveBlock(
+                blockId,
+                getMemberId(authentication),
+                startAt
+        );
+
+        return ResponseEntity.ok(
+                new ResponseDTO<>(ResponseCode.SUCCESS_UPDATE_BLOCK, null)
+        );
+    }
+
+
+
 
 }
