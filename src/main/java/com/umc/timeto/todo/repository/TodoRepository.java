@@ -20,4 +20,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     void deleteByTodoIdAndFolder_Goal_Member_MemberId(Long todoId, Long memberId);
 
     boolean existsByTodoIdAndFolder_Goal_Member_MemberId(Long todoId, Long memberId);
+
+    List<Todo> findByFolder_Goal_Member_MemberIdAndBlockIsNull(Long memberId);
+
 }

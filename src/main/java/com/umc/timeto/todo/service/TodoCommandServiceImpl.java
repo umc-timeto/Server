@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -73,4 +74,25 @@ public class TodoCommandServiceImpl implements TodoCommandService{
         }
         todoRepository.deleteByTodoIdAndFolder_Goal_Member_MemberId(todoId, memberId);
     }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<TodoGetResponse> getUnblockedTodos(Long memberId) {
+
+        List<Todo> todos =
+                todoRepository
+                        .findByFolder_Goal_Member_MemberIdAndBlockIsNull(memberId);
+
+        return todos.stream()
+                .map(todo -> new TodoGetResponse(
+                        todo.getTodoId(),
+                        todo.getName(),
+                        DurationFormatter.format(todo.getDuration()),
+                        todo.getPriority(),
+                        todo.getState()
+                ))
+                .toList();
+    }
+
 }

@@ -32,6 +32,8 @@ public enum ResponseCode {
     SUCCESS_GET_BLOCKLIST(HttpStatus.OK, "블록 리스트를 성공적으로 불러왔습니다."),
     SUCCESS_GET_BLOCK_NUMBER(HttpStatus.OK, "블록 수를 성공적으로 불러왔습니다."),
     SUCCESS_UPDATE_BLOCK(HttpStatus.OK, "블록을 성공적으로 업데이트했습니다"),
+    // 블록 생성 시 할일 조회
+    SUCCESS_GET_UNBLOCKED_TODOS(HttpStatus.OK, "블록을 생성할 할 일을 성공적으로 불러왔습니다."),
 
     // Common
     COMMON200(HttpStatus.OK, "요청에 성공하였습니다."),

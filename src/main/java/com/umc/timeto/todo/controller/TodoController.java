@@ -15,8 +15,12 @@ import com.umc.timeto.todo.service.TodoService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +31,10 @@ public class TodoController {
     private final TodoCommandService todoCommandService;
 
     private final TodoQueryService todoQueryService;
+
+    private Long getMemberId(Authentication authentication) {
+        return (Long) authentication.getPrincipal();
+    }
 
     @Operation(summary = "할 일 정보 조회", description = "todoId로 할 일 상세 정보를 조회합니다.")
     @GetMapping("/{todoId}")
@@ -109,4 +117,21 @@ public class TodoController {
         todoCommandService.deleteTodo(memberId, todoId);
         return new ResponseDTO<>(ResponseCode.COMMON200, "성공");
     }
+
+    @Operation(summary = "블록 생성 후보 할일 조회", description = "블록이 등록되지 않은 할 일을 조회합니다")
+    @GetMapping("/{folderId}/todo/unblocked")
+    public ResponseEntity<ResponseDTO<List<TodoGetResponse>>> getUnblockedTodos(
+            Authentication authentication
+    ) {
+
+        Long memberId = getMemberId(authentication);
+
+        return ResponseEntity.ok(
+                new ResponseDTO<>(
+                        ResponseCode.SUCCESS_GET_UNBLOCKED_TODOS,
+                        todoCommandService.getUnblockedTodos(memberId)
+                )
+        );
+    }
+
 }
