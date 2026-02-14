@@ -94,7 +94,8 @@ public class TodoCommandServiceImpl implements TodoCommandService{
                         todo.getName(),
                         DurationFormatter.format(todo.getDuration()),
                         todo.getPriority(),
-                        todo.getState()
+                        todo.getState(),
+                        todo.getStartAt()
                 ))
                 .toList();
     }
