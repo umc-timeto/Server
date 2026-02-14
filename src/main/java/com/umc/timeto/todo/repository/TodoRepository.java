@@ -3,6 +3,8 @@ package com.umc.timeto.todo.repository;
 import com.umc.timeto.todo.domain.Todo;
 import com.umc.timeto.todo.domain.enums.TodoState;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,4 +30,15 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     );
 
 
+    @Query("""
+        select t.folder.folderId as folderId, count(t) as cnt
+        from Todo t
+        where t.folder.goal.id = :goalId
+          and t.state = :state
+        group by t.folder.folderId
+    """)
+    List<FolderTodoCountProjection> countTodosGroupByFolder(
+            @Param("goalId") Long goalId,
+            @Param("state") TodoState state
+    );
 }

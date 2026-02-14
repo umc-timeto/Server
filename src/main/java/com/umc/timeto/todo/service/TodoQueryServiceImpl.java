@@ -31,7 +31,8 @@ public class TodoQueryServiceImpl implements TodoQueryService {
                 todo.getName(),
                 DurationFormatter.format(todo.getDuration()),
                 todo.getPriority(),
-                todo.getState()
+                todo.getState(),
+                todo.getStartAt()
         );
     }
     @Override
@@ -45,6 +46,7 @@ public class TodoQueryServiceImpl implements TodoQueryService {
                         .name(t.getName())
                         .priority(t.getPriority())
                         .duration(DurationFormatter.format(t.getDuration()))
+                        .startAt(t.getStartAt())
                         .build())
                 .toList();
 
@@ -65,6 +67,7 @@ public class TodoQueryServiceImpl implements TodoQueryService {
                         .name(t.getName())
                         .priority(t.getPriority())
                         .duration(DurationFormatter.format(t.getDuration()))
+                        .startAt(t.getStartAt())
                         .build())
                 .toList();
 
