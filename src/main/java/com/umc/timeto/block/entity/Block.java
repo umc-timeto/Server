@@ -31,17 +31,38 @@ public class Block {
 
     public Block(Todo todo, LocalDateTime startAt) {
         this.todo=todo;
-        this.startAt=startAt;
+
+        LocalDateTime normalizedStart = normalize(startAt);
+        this.startAt = normalizedStart;
         LocalTime duration = todo.getDuration();
-        this.endAt = startAt
+
+        LocalDateTime calculatedEnd = normalizedStart
                 .plusHours(duration.getHour())
-                .plusMinutes(duration.getMinute())
-                .plusSeconds(duration.getSecond());
+                .plusMinutes(duration.getMinute());
+
+        this.endAt = normalize(calculatedEnd);
     }
 
     public void updateTime(LocalDateTime startAt, LocalDateTime endAt) {
-        this.startAt = startAt;
-        this.endAt = endAt;
+        this.startAt = normalize(startAt);
+        this.endAt = normalize(endAt);
     }
+
+    private LocalDateTime normalize(LocalDateTime time) {
+        return time.withSecond(0).withNano(0);
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void trimSeconds() {
+        if (startAt != null) {
+            startAt = startAt.withSecond(0).withNano(0);
+        }
+        if (endAt != null) {
+            endAt = endAt.withSecond(0).withNano(0);
+        }
+    }
+
+
 
 }

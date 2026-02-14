@@ -1,4 +1,7 @@
 package com.umc.timeto.block.dto;
+
+import com.umc.timeto.todo.domain.enums.TodoPriority;
+import com.umc.timeto.todo.domain.enums.TodoState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,9 +13,16 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BlockResponseDTO {
+public class BlockResponseDetailDTO {
     private Long blockId;
     private Long todoId;
     private LocalDateTime startAt;
     private LocalDateTime endAt;
+    private String todoName;
+    private TodoPriority priority;
+    private TodoState state;
+    private String goalName;
+    private String color;
+
+
 }

@@ -2,6 +2,7 @@ package com.umc.timeto.block.service;
 
 import com.umc.timeto.block.dto.BlockAddDTO;
 import com.umc.timeto.block.dto.BlockResponseDTO;
+import com.umc.timeto.block.dto.BlockResponseDetailDTO;
 import com.umc.timeto.block.dto.BlockResponseNumDTO;
 import com.umc.timeto.block.entity.Block;
 import com.umc.timeto.block.repository.BlockRepository;
@@ -35,9 +36,8 @@ public class BlockServiceImpl implements BlockService {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.TODO_NOT_FOUND));
 
-        Block block = new Block(todo, req.getStartAt());
-        Block savedBlock = blockRepository.save(block);
 
+        // 블록 겹침 조회
         LocalDateTime startAt = req.getStartAt();
         LocalTime duration = todo.getDuration();
 
@@ -45,6 +45,7 @@ public class BlockServiceImpl implements BlockService {
                 .plusHours(duration.getHour())
                 .plusMinutes(duration.getMinute())
                 .plusSeconds(duration.getSecond());
+        System.out.println("시작시간" +startAt + "끝나는시간" +endAt);
 
         List<Block> overlaps =
                 blockRepository
@@ -59,6 +60,11 @@ public class BlockServiceImpl implements BlockService {
         }
 
 
+        //블록 저장
+        Block block = new Block(todo, startAt);
+        Block savedBlock = blockRepository.save(block);
+
+
         return BlockResponseDTO.builder()
                 .blockId(savedBlock.getBlockId())
                 .todoId(todoId)
@@ -68,7 +74,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public List<BlockResponseDTO> getBlockByDay(LocalDate date, Long memberId) {
+    public List<BlockResponseDetailDTO> getBlockByDay(LocalDate date, Long memberId) {
 
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(23, 59, 59);
@@ -81,12 +87,18 @@ public class BlockServiceImpl implements BlockService {
                                 end
                         );
 
+
         return blocks.stream()
-                .map(block -> BlockResponseDTO.builder()
+                .map(block -> BlockResponseDetailDTO.builder()
                         .blockId(block.getBlockId())
                         .todoId(block.getTodo().getTodoId())
                         .startAt(block.getStartAt())
                         .endAt(block.getEndAt())
+                        .todoName(block.getTodo().getName())
+                        .priority(block.getTodo().getPriority())
+                        .state(block.getTodo().getState())
+                        .goalName(block.getTodo().getFolder().getGoal().getName())
+                        .color(block.getTodo().getFolder().getGoal().getColor())
                         .build())
                 .collect(Collectors.toList());
     }

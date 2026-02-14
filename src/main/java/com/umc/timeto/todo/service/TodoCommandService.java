@@ -14,6 +14,6 @@ public interface TodoCommandService {
     void deleteTodo(Long memberId, Long todoId);
 
     @Transactional(readOnly = true)
-    List<TodoGetResponse> getUnblockedTodos(Long memberId);
+    List<TodoGetResponse> getUnblockedTodos(Long memberId,Long folderId);
 }
 

@@ -78,11 +78,14 @@ public class TodoCommandServiceImpl implements TodoCommandService{
 
     @Transactional(readOnly = true)
     @Override
-    public List<TodoGetResponse> getUnblockedTodos(Long memberId) {
+    public List<TodoGetResponse> getUnblockedTodos(Long memberId,Long folderId) {
 
         List<Todo> todos =
                 todoRepository
-                        .findByFolder_Goal_Member_MemberIdAndBlockIsNull(memberId);
+                        .findByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndBlockIsNull(
+                                folderId,
+                                memberId
+                        );
 
         return todos.stream()
                 .map(todo -> new TodoGetResponse(

@@ -121,6 +121,7 @@ public class TodoController {
     @Operation(summary = "블록 생성 후보 할일 조회", description = "블록이 등록되지 않은 할 일을 조회합니다")
     @GetMapping("/{folderId}/todo/unblocked")
     public ResponseEntity<ResponseDTO<List<TodoGetResponse>>> getUnblockedTodos(
+            @PathVariable Long folderId,
             Authentication authentication
     ) {
 
@@ -129,7 +130,7 @@ public class TodoController {
         return ResponseEntity.ok(
                 new ResponseDTO<>(
                         ResponseCode.SUCCESS_GET_UNBLOCKED_TODOS,
-                        todoCommandService.getUnblockedTodos(memberId)
+                        todoCommandService.getUnblockedTodos(memberId,folderId)
                 )
         );
     }
