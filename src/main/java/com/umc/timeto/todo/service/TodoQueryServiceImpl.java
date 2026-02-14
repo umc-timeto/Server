@@ -1,6 +1,4 @@
 package com.umc.timeto.todo.service;
-
-import com.umc.timeto.folder.repository.FolderRepository;
 import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.exception.GlobalException;
 import com.umc.timeto.todo.domain.Todo;
