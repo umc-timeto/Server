@@ -12,6 +12,8 @@ public enum ErrorCode {
      * 400 BAD_REQUEST - 잘못된 요청
      */
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+    BLOCK_TIME_CONFLICT(HttpStatus.BAD_REQUEST, "이미 해당 시간에 블록이 존재합니다."),
+
 
     /**
      * 401 UNAUTHORIZED - 인증 실패
@@ -32,6 +34,7 @@ public enum ErrorCode {
     GOAL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 목표가 존재하지 않습니다."),
     FOLDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 폴더가 존재하지 않습니다."),
     TODO_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 아이디를 가진 할 일이 존재하지 않습니다."),
+    BLOCK_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 아이디를 가진 블록이 존재하지 않습니다."),
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디를 가진 일지가 존재하지 않습니다."),
 
 

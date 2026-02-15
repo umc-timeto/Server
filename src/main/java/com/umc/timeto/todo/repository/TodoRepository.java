@@ -23,6 +23,13 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     boolean existsByTodoIdAndFolder_Goal_Member_MemberId(Long todoId, Long memberId);
 
+    // block 후보 조회에 사용
+    List<Todo> findByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndBlockIsNull(
+            Long folderId,
+            Long memberId
+    );
+
+
     @Query("""
         select t.folder.folderId as folderId, count(t) as cnt
         from Todo t
