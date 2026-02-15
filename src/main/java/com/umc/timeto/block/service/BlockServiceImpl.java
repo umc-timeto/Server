@@ -33,7 +33,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public BlockResponseDTO createBlock(Long todoId, BlockAddDTO req, Long memberId) {
 
-        Todo todo = todoRepository.findById(todoId)
+        Todo todo = todoRepository.findByTodoIdAndFolder_Goal_Member_MemberId(todoId,memberId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.TODO_NOT_FOUND));
 
 
