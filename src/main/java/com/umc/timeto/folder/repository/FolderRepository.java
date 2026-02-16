@@ -10,7 +10,8 @@ import java.util.List;
 @Repository
 public interface FolderRepository extends JpaRepository<Folder, Long> {
 
-    List<Folder> findAllByGoal(Goal goal);
     Optional<Folder> findByFolderIdAndGoal_Member_MemberId(Long folderId, Long memberId);
+    List<Folder> findAllByGoalOrderBySortOrderAsc(Goal goal);
+    Optional<Folder> findTopByGoalOrderBySortOrderDesc(Goal goal);
 
 }
