@@ -13,6 +13,7 @@ public enum ErrorCode {
      */
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     BLOCK_TIME_CONFLICT(HttpStatus.BAD_REQUEST, "이미 해당 시간에 블록이 존재합니다."),
+    INVALID_INDEX(HttpStatus.BAD_REQUEST, "인덱스 범위를 벗어났습니다"),
 
 
     /**

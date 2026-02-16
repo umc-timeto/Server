@@ -18,6 +18,9 @@ public class Folder {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "sort_order", nullable = false)
+    private Integer sortOrder;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "goal_id", nullable = false)
     private Goal goal;
@@ -30,4 +33,6 @@ public class Folder {
     public void updateName(String name) {
         this.name = name;
     }
+
+    public void updateSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
 }

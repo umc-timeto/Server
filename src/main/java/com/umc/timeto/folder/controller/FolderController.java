@@ -76,4 +76,46 @@ public class FolderController {
                 .status(ResponseCode.SUCCESS_DELETE_FOLDER.getStatus().value())
                 .body(new ResponseDTO<>(ResponseCode.SUCCESS_DELETE_FOLDER, null));
     }
+
+    @Operation(
+            summary = "폴더 이동",
+            description = """
+    폴더를 드래그&드롭으로 이동했을 때 변경된 인덱스를 반영합니다.
+    프론트엔드는 이동 후의 최종 인덱스(newIndex)를 전달합니다.
+    newIndex는 0 이상 현재 폴더 개수 미만이어야 합니다.
+
+    예시)
+    기존 순서:
+    0 A
+    1 B
+    2 C
+    3 D
+
+    B를 맨 아래(3번 인덱스)로 이동하는 경우:
+    요청 → newIndex = 3
+
+    변경 결과:
+    0 A
+    1 C
+    2 D
+    3 B
+    """
+    )
+    @PatchMapping("/folder/{folderId}/move")
+    public ResponseEntity<ResponseDTO<Void>> moveFolder(
+            @PathVariable Long folderId,
+            @RequestParam Integer newIndex,
+            Authentication authentication
+    ) {
+
+        Long memberId = getMemberId(authentication);
+
+        folderService.moveFolder(folderId, memberId, newIndex);
+
+        return ResponseEntity
+                .status(ResponseCode.SUCCESS_UPDATE_FOLDER.getStatus().value())
+                .body(new ResponseDTO<>(ResponseCode.SUCCESS_UPDATE_FOLDER, null));
+    }
+
+
 }
