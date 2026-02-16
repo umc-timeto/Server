@@ -3,6 +3,9 @@ package com.umc.timeto.dailyLog.repository;
 import com.umc.timeto.dailyLog.entity.DailyLog;
 import com.umc.timeto.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -13,4 +16,9 @@ import java.util.Optional;
 public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
     Optional<DailyLog> findByMemberAndCreatedAt(Member member, LocalDate createdAt);
     List<DailyLog> findByMemberAndCreatedAtBetween(Member member, LocalDate start, LocalDate end);
+
+    // 회원의 일지 전체 삭제
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from DailyLog d where d.member.memberId = :memberId")
+    void deleteAllByMemberId(@Param("memberId") Long memberId);
 }
