@@ -41,8 +41,8 @@ public class AuthController {
         AuthService.LoginResult result = authService.kakaoLogin(request.getAuthorizationCode());
 
         ResponseCode responseCode = result.isNewMember()
-                ? ResponseCode.COMMON201
-                : ResponseCode.COMMON200;
+                ? ResponseCode.AUTH_KAKAO_SIGNUP_SUCCESS
+                : ResponseCode.AUTH_KAKAO_LOGIN_SUCCESS;
 
         return ResponseEntity
                 .status(responseCode.getStatus())
@@ -80,8 +80,8 @@ public class AuthController {
         TokenRefreshResponse response = authService.refresh(refreshToken.trim());
 
         return ResponseEntity
-                .status(ResponseCode.AUTH200.getStatus())
-                .body(new ResponseDTO<>(ResponseCode.AUTH200, response));
+                .status(ResponseCode.AUTH_TOKEN_REISSUE_SUCCESS.getStatus())
+                .body(new ResponseDTO<>(ResponseCode.AUTH_TOKEN_REISSUE_SUCCESS, response));
     }
 
     // 회원 탈퇴(소프트 딜리트)

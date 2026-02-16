@@ -46,7 +46,14 @@ public enum ResponseCode {
     AUTH_LOGIN_SUCCESS(HttpStatus.OK, "로그인에 성공하였습니다."),
     AUTH_LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃에 성공하였습니다."),
     AUTH_DELETE_SUCCESS(HttpStatus.OK, "회원 탈퇴가 완료되었습니다."),
+    AUTH_SIGNUP_SUCCESS(HttpStatus.CREATED, "회원가입에 성공하였습니다."),
+    AUTH_LOGIN_OR_SIGNUP_SUCCESS(HttpStatus.CREATED, "회원 가입 및 로그인에 성공하였습니다."),
 
+    AUTH_TOKEN_REISSUE_SUCCESS(HttpStatus.OK, "토큰 재발급에 성공하였습니다."),
+
+    // Kakao login flow success
+    AUTH_KAKAO_LOGIN_SUCCESS(HttpStatus.OK, "카카오 로그인에 성공하였습니다."),
+    AUTH_KAKAO_SIGNUP_SUCCESS(HttpStatus.CREATED, "카카오 회원가입에 성공하였습니다."),
     
     // DailyLog
     SUCCESS_SAVE_LOG(HttpStatus.CREATED, "일지를 성공적으로 저장했습니다."),
