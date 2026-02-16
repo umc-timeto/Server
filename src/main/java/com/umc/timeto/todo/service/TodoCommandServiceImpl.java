@@ -1,6 +1,5 @@
 package com.umc.timeto.todo.service;
-
-import com.umc.timeto.folder.repository.FolderRepository;
+import com.umc.timeto.block.service.BlockService;
 import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.exception.GlobalException;
 import com.umc.timeto.todo.domain.Todo;
@@ -16,13 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TodoCommandServiceImpl implements TodoCommandService{
     private final TodoRepository todoRepository;
-    private final FolderRepository folderRepository;
+    private final BlockService blockService;
 
     @Override
     public TodoStatusUpdateResponse updateStatus(Long memberId,Long todoId, TodoStatusUpdateRequest request) {
@@ -51,10 +51,10 @@ public class TodoCommandServiceImpl implements TodoCommandService{
         if (request.getPriority() != null) {
             todo.changePriority(request.getPriority());
         }
-
+        // duration 변경 시 Block이 처리
         if (request.getDuration() != null && !request.getDuration().isBlank()) {
             LocalTime parsed = DurationParser.parseToLocalTime(request.getDuration());
-            todo.changeDuration(parsed);
+            blockService.updateBlockDurationByTodo(todoId, memberId, parsed);
         }
 
         return new TodoGetResponse(
@@ -75,4 +75,29 @@ public class TodoCommandServiceImpl implements TodoCommandService{
         }
         todoRepository.deleteByTodoIdAndFolder_Goal_Member_MemberId(todoId, memberId);
     }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<TodoGetResponse> getUnblockedTodos(Long memberId,Long folderId) {
+
+        List<Todo> todos =
+                todoRepository
+                        .findByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndBlockIsNull(
+                                folderId,
+                                memberId
+                        );
+
+        return todos.stream()
+                .map(todo -> new TodoGetResponse(
+                        todo.getTodoId(),
+                        todo.getName(),
+                        DurationFormatter.format(todo.getDuration()),
+                        todo.getPriority(),
+                        todo.getState(),
+                        todo.getStartAt()
+                ))
+                .toList();
+    }
+
 }

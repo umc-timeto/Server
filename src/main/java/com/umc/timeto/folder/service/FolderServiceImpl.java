@@ -41,13 +41,25 @@ public class FolderServiceImpl implements FolderService {
             throw new GlobalException(ErrorCode.GOAL_FORBIDDEN);
         }
 
-        Folder folder = folderRepository.save(dto.toEntity(goal));
+        Integer nextOrder = folderRepository
+                .findTopByGoalOrderBySortOrderDesc(goal)
+                .map(folder -> folder.getSortOrder() + 1)
+                .orElse(0);
+
+        Folder folder = Folder.builder()
+                .name(dto.getFolderName())
+                .goal(goal)
+                .sortOrder(nextOrder)
+                .build();
+
+        folderRepository.save(folder);
 
         return FolderResponseDTO.builder()
                 .id(folder.getFolderId())
                 .name(folder.getName())
                 .build();
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -68,7 +80,7 @@ public class FolderServiceImpl implements FolderService {
                         FolderTodoCountProjection::getCnt
                 ));
 
-        return folderRepository.findAllByGoal(goal)
+        return folderRepository.findAllByGoalOrderBySortOrderAsc(goal)
                 .stream()
                 .map(folder -> FolderListResponseDTO.builder()
                         .id(folder.getFolderId())
@@ -106,6 +118,44 @@ public class FolderServiceImpl implements FolderService {
             throw new GlobalException(ErrorCode.GOAL_FORBIDDEN);
         }
 
+        Goal goal = folder.getGoal();
+
         folderRepository.delete(folder);
+
+        List<Folder> folders =
+                folderRepository.findAllByGoalOrderBySortOrderAsc(goal);
+
+        for (int i = 0; i < folders.size(); i++) {
+            folders.get(i).updateSortOrder(i);
+        }
     }
+
+
+    @Override
+    public void moveFolder(Long folderId, Long memberId, Integer newIndex) {
+
+        Folder target = folderRepository.findById(folderId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.FOLDER_NOT_FOUND));
+
+        if (!target.getGoal().getMember().getMemberId().equals(memberId)) {
+            throw new GlobalException(ErrorCode.GOAL_FORBIDDEN);
+        }
+
+        Goal goal = target.getGoal();
+
+        List<Folder> folders =
+                folderRepository.findAllByGoalOrderBySortOrderAsc(goal);
+
+        if (newIndex < 0 || newIndex >= folders.size()) {
+            throw new GlobalException(ErrorCode.INVALID_INDEX);
+        }
+
+        folders.remove(target);
+        folders.add(newIndex, target);
+
+        for (int i = 0; i < folders.size(); i++) {
+            folders.get(i).updateSortOrder(i);
+        }
+    }
+
 }

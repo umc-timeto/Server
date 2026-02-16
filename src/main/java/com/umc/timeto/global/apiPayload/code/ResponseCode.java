@@ -24,17 +24,29 @@ public enum ResponseCode {
     SUCCESS_UPDATE_FOLDER(HttpStatus.OK, "폴더를 성공적으로 수정했습니다."),
     SUCCESS_DELETE_FOLDER(HttpStatus.OK, "폴더를 성공적으로 삭제했습니다."),
 
+
+    /**
+     * block
+     */
+    SUCCESS_ADD_BLOCK(HttpStatus.CREATED, "블록을 성공적으로 등록했습니다."),
+    SUCCESS_GET_BLOCKLIST(HttpStatus.OK, "블록 리스트를 성공적으로 불러왔습니다."),
+    SUCCESS_GET_BLOCK_NUMBER(HttpStatus.OK, "블록 수를 성공적으로 불러왔습니다."),
+    SUCCESS_UPDATE_BLOCK(HttpStatus.OK, "블록을 성공적으로 업데이트했습니다"),
+    // 블록 생성 시 할일 조회
+    SUCCESS_GET_UNBLOCKED_TODOS(HttpStatus.OK, "블록을 생성할 할 일을 성공적으로 불러왔습니다."),
+
     // Common
     COMMON200(HttpStatus.OK, "요청에 성공하였습니다."),
     COMMON201(HttpStatus.CREATED, "회원 가입 및 로그인 성공"),
     COMMON400(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     COMMON401(HttpStatus.UNAUTHORIZED, "인증에 실패하였습니다."),
+
     // Auth
     AUTH200(HttpStatus.OK, "토큰 재발급에 성공하였습니다."),
-
-
-    // Auth
     AUTH_LOGIN_SUCCESS(HttpStatus.OK, "로그인에 성공하였습니다."),
+    AUTH_LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃에 성공하였습니다."),
+    AUTH_DELETE_SUCCESS(HttpStatus.OK, "회원 탈퇴가 완료되었습니다."),
+
     
     // DailyLog
     SUCCESS_SAVE_LOG(HttpStatus.CREATED, "일지를 성공적으로 저장했습니다."),

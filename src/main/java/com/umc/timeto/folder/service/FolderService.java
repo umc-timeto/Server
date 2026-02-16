@@ -16,4 +16,6 @@ public interface FolderService {
     FolderResponseDTO updateFolder(Long folderId, FolderUpdateDTO dto, Long memberId);
 
     void deleteFolder(Long folderId, Long memberId);
+
+    void moveFolder(Long folderId, Long memberId, Integer newIndex);
 }
