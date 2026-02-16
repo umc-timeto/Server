@@ -16,6 +16,7 @@ import com.umc.timeto.member.entity.Member;
 import com.umc.timeto.member.repository.MemberRepository;
 import com.umc.timeto.todo.repository.TodoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,8 +43,28 @@ public class AuthService {
     @Transactional
     public LoginResult kakaoLogin(String authorizationCode) {
 
-        String kakaoAccessToken = kakaoClient.getAccessToken(authorizationCode);
-        KakaoUserInfo userInfo = kakaoClient.getUserInfo(kakaoAccessToken);
+        String kakaoAccessToken;
+        KakaoUserInfo userInfo;
+
+        try {
+            kakaoAccessToken = kakaoClient.getAccessToken(authorizationCode);
+        } catch (GlobalException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GlobalException(ErrorCode.KAKAO_USER_API_FAILED);
+        }
+
+        try {
+            userInfo = kakaoClient.getUserInfo(kakaoAccessToken);
+        } catch (GlobalException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GlobalException(ErrorCode.KAKAO_USER_API_FAILED);
+        }
+
+        if (userInfo == null) {
+            throw new GlobalException(ErrorCode.KAKAO_RESPONSE_PARSE_FAILED);
+        }
 
         Optional<Member> existingMember = memberRepository.findByKakaoId(userInfo.getKakaoId());
 
@@ -57,14 +78,27 @@ public class AuthService {
             // 회원탈퇴(소프트딜리트)된 계정이라면 14일 내 재로그인 시 복구
             restoreIfWithinGracePeriod(member);
 
+            if (member.isDeleted()) {
+                throw new GlobalException(ErrorCode.AUTH_WITHDRAWN_MEMBER);
+            }
+
         } else {
-            member = memberRepository.save(
-                    Member.createKakaoMember(
-                            userInfo.getKakaoId(),
-                            userInfo.getEmail(),
-                            userInfo.getName()
-                    )
-            );
+            if (userInfo.getEmail() == null || userInfo.getEmail().isBlank()) {
+                throw new GlobalException(ErrorCode.AUTH_EMAIL_REQUIRED);
+            }
+
+            try {
+                member = memberRepository.save(
+                        Member.createKakaoMember(
+                                userInfo.getKakaoId(),
+                                userInfo.getEmail(),
+                                userInfo.getName()
+                        )
+                );
+            } catch (DataIntegrityViolationException e) {
+                throw new GlobalException(ErrorCode.AUTH_MEMBER_DUPLICATE);
+            }
+
             isNewMember = true;
         }
 
