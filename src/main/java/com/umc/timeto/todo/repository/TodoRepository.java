@@ -3,6 +3,7 @@ package com.umc.timeto.todo.repository;
 import com.umc.timeto.todo.domain.Todo;
 import com.umc.timeto.todo.domain.enums.TodoState;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -41,4 +42,17 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
             @Param("goalId") Long goalId,
             @Param("state") TodoState state
     );
+
+    // 회원의 할일 전체 삭제(폴더 → 목표 → 회원 기준으로 조인)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        delete from Todo t
+        where t.folder.folderId in (
+            select f.folderId from Folder f
+            where f.goal.id in (
+                select g.id from Goal g where g.member.memberId = :memberId
+            )
+        )
+    """)
+    void deleteAllByMemberId(@Param("memberId") Long memberId);
 }
