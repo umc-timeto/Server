@@ -6,8 +6,10 @@ import com.umc.timeto.auth.dto.LogoutResponse;
 import com.umc.timeto.auth.dto.TokenRefreshRequest;
 import com.umc.timeto.auth.dto.TokenRefreshResponse;
 import com.umc.timeto.auth.service.AuthService;
+import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.code.ResponseCode;
 import com.umc.timeto.global.apiPayload.dto.ResponseDTO;
+import com.umc.timeto.global.apiPayload.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -53,17 +55,15 @@ public class AuthController {
             @RequestHeader(value = "Authorization", required = false) String authorization
     ) {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            return ResponseEntity
-                    .status(ResponseCode.COMMON401.getStatus())
-                    .body(new ResponseDTO<>(ResponseCode.COMMON401));
+            throw new GlobalException(ErrorCode.AUTHORIZATION_HEADER_MISSING);
         }
 
         String accessToken = authorization.substring(7).trim();
         authService.logout(accessToken);
 
         return ResponseEntity
-                .status(ResponseCode.COMMON200.getStatus())
-                .body(new ResponseDTO<>(ResponseCode.COMMON200, new LogoutResponse("로그아웃 성공")));
+                .status(ResponseCode.AUTH_LOGOUT_SUCCESS.getStatus())
+                .body(new ResponseDTO<>(ResponseCode.AUTH_LOGOUT_SUCCESS, new LogoutResponse("로그아웃 성공")));
     }
 
     // 토큰 재발급
@@ -74,34 +74,38 @@ public class AuthController {
         String refreshToken = request.refreshToken();
 
         if (refreshToken == null || refreshToken.isBlank()) {
-            return ResponseEntity
-                    .status(ResponseCode.COMMON401.getStatus())
-                    .body(new ResponseDTO<>(ResponseCode.COMMON401));
+            throw new GlobalException(ErrorCode.BAD_REQUEST);
         }
 
-        try {
-            TokenRefreshResponse response = authService.refresh(refreshToken.trim());
+        TokenRefreshResponse response = authService.refresh(refreshToken.trim());
 
-            return ResponseEntity
-                    .status(ResponseCode.AUTH200.getStatus())
-                    .body(new ResponseDTO<>(ResponseCode.AUTH200, response));
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                    .status(ResponseCode.COMMON401.getStatus())
-                    .body(new ResponseDTO<>(ResponseCode.COMMON401));
-        }
+        return ResponseEntity
+                .status(ResponseCode.AUTH200.getStatus())
+                .body(new ResponseDTO<>(ResponseCode.AUTH200, response));
     }
 
     // 회원 탈퇴(소프트 딜리트)
     @DeleteMapping("/delete")
     public ResponseEntity<ResponseDTO<String>> deleteAccount(Authentication authentication) {
-        Long memberId = (Long) authentication.getPrincipal();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new GlobalException(ErrorCode.AUTH_INVALID_TOKEN);
+        }
+
+        Object principal = authentication.getPrincipal();
+        Long memberId;
+
+        if (principal instanceof Long) {
+            memberId = (Long) principal;
+        } else if (principal instanceof String) {
+            memberId = Long.parseLong((String) principal);
+        } else {
+            throw new GlobalException(ErrorCode.AUTH_INVALID_TOKEN);
+        }
 
         authService.requestDelete(memberId);
 
         return ResponseEntity
-                .status(ResponseCode.COMMON200.getStatus())
-                .body(new ResponseDTO<>(ResponseCode.COMMON200, "성공"));
+                .status(ResponseCode.AUTH_DELETE_SUCCESS.getStatus())
+                .body(new ResponseDTO<>(ResponseCode.AUTH_DELETE_SUCCESS, "성공"));
     }
 }

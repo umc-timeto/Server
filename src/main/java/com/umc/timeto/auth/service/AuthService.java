@@ -91,7 +91,7 @@ public class AuthService {
     @Transactional
     public void logout(String accessToken) {
         if (!jwtProvider.validateToken(accessToken)) {
-            throw new IllegalArgumentException("Invalid access token");
+            throw new GlobalException(ErrorCode.AUTH_INVALID_TOKEN);
         }
 
         Long memberId = jwtProvider.getMemberId(accessToken);
@@ -107,16 +107,16 @@ public class AuthService {
     @Transactional
     public TokenRefreshResponse refresh(String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("Invalid refresh token");
+            throw new GlobalException(ErrorCode.AUTH_INVALID_TOKEN);
         }
 
         Long memberId = jwtProvider.getMemberId(refreshToken);
 
         RefreshToken savedToken = refreshTokenRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+                .orElseThrow(() -> new GlobalException(ErrorCode.AUTH_REFRESH_TOKEN_NOT_FOUND));
 
         if (!savedToken.getToken().equals(refreshToken)) {
-            throw new IllegalArgumentException("Refresh token mismatch");
+            throw new GlobalException(ErrorCode.AUTH_REFRESH_TOKEN_MISMATCH);
         }
 
         String newAccessToken = jwtProvider.createAccessToken(memberId);
