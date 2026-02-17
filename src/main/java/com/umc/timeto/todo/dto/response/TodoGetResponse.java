@@ -16,4 +16,5 @@ public class TodoGetResponse {
     private TodoPriority priority;
     private TodoState state;
     private LocalDateTime startAt;
+    private Integer sortOrder;
 }

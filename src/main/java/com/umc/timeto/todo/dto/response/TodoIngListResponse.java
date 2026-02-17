@@ -24,5 +24,6 @@ public class TodoIngListResponse {
         private TodoPriority priority;
         private String duration; // "1H 10M" 형태
         private LocalDateTime startAt;
+        private Integer sortOrder;
     }
 }

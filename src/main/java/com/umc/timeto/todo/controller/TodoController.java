@@ -3,12 +3,10 @@ package com.umc.timeto.todo.controller;
 import com.umc.timeto.global.apiPayload.code.ResponseCode;
 import com.umc.timeto.global.apiPayload.dto.ResponseDTO;
 import com.umc.timeto.todo.dto.request.TodoCreateRequest;
+import com.umc.timeto.todo.dto.request.TodoOrderUpdateRequest;
 import com.umc.timeto.todo.dto.request.TodoStatusUpdateRequest;
 import com.umc.timeto.todo.dto.request.TodoUpdateRequest;
-import com.umc.timeto.todo.dto.response.TodoCreateResponse;
-import com.umc.timeto.todo.dto.response.TodoGetResponse;
-import com.umc.timeto.todo.dto.response.TodoIngListResponse;
-import com.umc.timeto.todo.dto.response.TodoStatusUpdateResponse;
+import com.umc.timeto.todo.dto.response.*;
 import com.umc.timeto.todo.service.TodoCommandService;
 import com.umc.timeto.todo.service.TodoQueryService;
 import com.umc.timeto.todo.service.TodoService;
@@ -134,5 +132,17 @@ public class TodoController {
                 )
         );
     }
+
+    @Operation(summary = "할 일 순서 변경", description = "todoId를 targetOrder로 이동시킵니다. (state별 정렬)")
+    @PatchMapping("/order/{todoId}")
+    public ResponseDTO<TodoOrderUpdateResponse> updateTodoOrder(
+            @PathVariable Long todoId,
+            @RequestBody @Valid TodoOrderUpdateRequest request
+    ) {
+        Long memberId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        TodoOrderUpdateResponse data = todoCommandService.updateTodoOrder(memberId, todoId, request.getTargetOrder());
+        return new ResponseDTO<>(ResponseCode.COMMON200, data);
+    }
+
 
 }

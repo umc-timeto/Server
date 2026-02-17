@@ -44,6 +44,17 @@ public class Todo {
     @Column(name = "start_at")
     private LocalDateTime startAt;
 
+    // 추가
+    @Column(name = "sort_order", nullable = false)
+    private Integer sortOrder;
+
+// getter는 @Getter로 자동
+
+    public void changeSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+
     // ✅ 지금은 연관관계 없이 숫자 FK만 들고감
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id", nullable = false)
@@ -60,16 +71,18 @@ public class Todo {
 
 
 
-    public static Todo create(Folder folder, String name, TodoPriority priority, LocalTime duration) {
+    public static Todo create(Folder folder, String name, TodoPriority priority, LocalTime duration, int sortOrder) {
         Todo todo = new Todo();
         todo.folder = folder;
         todo.name = name;
         todo.priority = priority;
         todo.duration = duration;
-        todo.state = TodoState.progress; // 기본값
+        todo.state = TodoState.progress;
         todo.createAt = LocalDateTime.now();
+        todo.sortOrder = sortOrder;
         return todo;
     }
+
 
     public void changeState(TodoState state) {
         this.state = state;
