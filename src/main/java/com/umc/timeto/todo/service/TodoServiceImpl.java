@@ -5,6 +5,7 @@ import com.umc.timeto.folder.repository.FolderRepository;
 import com.umc.timeto.global.apiPayload.code.ErrorCode;
 import com.umc.timeto.global.apiPayload.exception.GlobalException;
 import com.umc.timeto.todo.domain.Todo;
+import com.umc.timeto.todo.domain.enums.TodoState;
 import com.umc.timeto.todo.dto.request.TodoCreateRequest;
 import com.umc.timeto.todo.dto.response.TodoCreateResponse;
 import com.umc.timeto.todo.repository.TodoRepository;
@@ -31,7 +32,11 @@ public class TodoServiceImpl implements TodoService {
 
         LocalTime duration = DurationParser.parseToLocalTime(request.getDuration());
 
-        Todo todo = Todo.create(folder, request.getName(), request.getPriority(), duration);
+        int max = todoRepository.findMaxSortOrder(folderId, memberId, TodoState.progress);
+        int newOrder = max + 1;
+
+        Todo todo = Todo.create(folder, request.getName(), request.getPriority(), duration, newOrder);
+
         Todo saved = todoRepository.save(todo);
 
         return new TodoCreateResponse(saved.getTodoId());

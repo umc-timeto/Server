@@ -30,13 +30,17 @@ public class TodoQueryServiceImpl implements TodoQueryService {
                 DurationFormatter.format(todo.getDuration()),
                 todo.getPriority(),
                 todo.getState(),
-                todo.getStartAt()
+                todo.getStartAt(),
+                todo.getSortOrder()
         );
     }
     @Override
     public TodoIngListResponse getInProgressTodos(Long memberId, Long folderId) {
 
-        List<Todo> todos = todoRepository.findAllByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndState(folderId,memberId, TodoState.progress);
+        List<Todo> todos =
+                todoRepository.findAllByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndStateOrderBySortOrderAsc(
+                        folderId, memberId, TodoState.progress
+                );
 
         List<TodoIngListResponse.TodoIngItem> items = todos.stream()
                 .map(t -> TodoIngListResponse.TodoIngItem.builder()
@@ -45,8 +49,10 @@ public class TodoQueryServiceImpl implements TodoQueryService {
                         .priority(t.getPriority())
                         .duration(DurationFormatter.format(t.getDuration()))
                         .startAt(t.getStartAt())
+                        .sortOrder(t.getSortOrder()) // ✅
                         .build())
                 .toList();
+
 
         return TodoIngListResponse.builder()
                 .count(items.size())
@@ -57,7 +63,10 @@ public class TodoQueryServiceImpl implements TodoQueryService {
     @Override
     public TodoIngListResponse getCompleteTodos(Long memberId, Long folderId) {
         // ✅ enum이 COMPLETE면 TodoState.COMPLETE 로 변경
-        List<Todo> todos = todoRepository.findAllByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndState(folderId,memberId, TodoState.complete);
+        List<Todo> todos =
+                todoRepository.findAllByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndStateOrderBySortOrderAsc(
+                        folderId, memberId, TodoState.complete
+                );
 
         List<TodoIngListResponse.TodoIngItem> items = todos.stream()
                 .map(t -> TodoIngListResponse.TodoIngItem.builder()
@@ -66,8 +75,10 @@ public class TodoQueryServiceImpl implements TodoQueryService {
                         .priority(t.getPriority())
                         .duration(DurationFormatter.format(t.getDuration()))
                         .startAt(t.getStartAt())
+                        .sortOrder(t.getSortOrder()) // ✅
                         .build())
                 .toList();
+
 
         return TodoIngListResponse.builder()
                 .count(items.size())

@@ -18,6 +18,116 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo> findAllByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndState(
             Long folderId, Long memberId, TodoState state
     );
+    List<Todo> findAllByFolder_FolderIdAndFolder_Goal_Member_MemberIdAndStateOrderBySortOrderAsc(
+            Long folderId, Long memberId, TodoState state
+    );
+
+    @Query("""
+    select coalesce(max(t.sortOrder), 0)
+    from Todo t
+    where t.folder.folderId = :folderId
+      and t.state = :state
+      and exists (
+           select 1
+             from Folder f
+             join f.goal g
+            where f = t.folder
+              and g.member.memberId = :memberId
+      )
+""")
+    int findMaxSortOrder(@Param("folderId") Long folderId,
+                         @Param("memberId") Long memberId,
+                         @Param("state") TodoState state);
+
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+    update Todo t
+       set t.sortOrder = t.sortOrder - 1
+     where t.folder.folderId = :folderId
+       and t.state = :state
+       and t.sortOrder > :deletedOrder
+       and exists (
+           select 1
+             from Folder f
+             join f.goal g
+            where f = t.folder
+              and g.member.memberId = :memberId
+       )
+""")
+    void pullUpAfterDelete(@Param("folderId") Long folderId,
+                           @Param("memberId") Long memberId,
+                           @Param("state") TodoState state,
+                           @Param("deletedOrder") int deletedOrder);
+
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+    update Todo t
+       set t.sortOrder = t.sortOrder + 1
+     where t.folder.folderId = :folderId
+       and t.state = :state
+       and t.sortOrder >= :targetOrder
+       and t.sortOrder < :currentOrder
+       and exists (
+           select 1
+             from Folder f
+             join f.goal g
+            where f = t.folder
+              and g.member.memberId = :memberId
+       )
+""")
+    void shiftDownForMoveUp(@Param("folderId") Long folderId,
+                            @Param("memberId") Long memberId,
+                            @Param("state") TodoState state,
+                            @Param("targetOrder") int targetOrder,
+                            @Param("currentOrder") int currentOrder);
+
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+    update Todo t
+       set t.sortOrder = t.sortOrder - 1
+     where t.folder.folderId = :folderId
+       and t.state = :state
+       and t.sortOrder > :currentOrder
+       and t.sortOrder <= :targetOrder
+       and exists (
+           select 1
+             from Folder f
+             join f.goal g
+            where f = t.folder
+              and g.member.memberId = :memberId
+       )
+""")
+    void shiftUpForMoveDown(@Param("folderId") Long folderId,
+                            @Param("memberId") Long memberId,
+                            @Param("state") TodoState state,
+                            @Param("currentOrder") int currentOrder,
+                            @Param("targetOrder") int targetOrder);
+
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+    update Todo t
+       set t.sortOrder = t.sortOrder - 1
+     where t.folder.folderId = :folderId
+       and t.state = :fromState
+       and t.sortOrder > :fromOrder
+       and exists (
+           select 1
+             from Folder f
+             join f.goal g
+            where f = t.folder
+              and g.member.memberId = :memberId
+       )
+""")
+    void pullUpAfterStateMove(@Param("folderId") Long folderId,
+                              @Param("memberId") Long memberId,
+                              @Param("fromState") TodoState fromState,
+                              @Param("fromOrder") int fromOrder);
+
+
 
     // ✅ 내 todo만 삭제
     void deleteByTodoIdAndFolder_Goal_Member_MemberId(Long todoId, Long memberId);
