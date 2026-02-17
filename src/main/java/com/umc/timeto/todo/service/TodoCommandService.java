@@ -3,6 +3,7 @@ package com.umc.timeto.todo.service;
 import com.umc.timeto.todo.dto.request.TodoStatusUpdateRequest;
 import com.umc.timeto.todo.dto.request.TodoUpdateRequest;
 import com.umc.timeto.todo.dto.response.TodoGetResponse;
+import com.umc.timeto.todo.dto.response.TodoOrderUpdateResponse;
 import com.umc.timeto.todo.dto.response.TodoStatusUpdateResponse;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,5 +16,8 @@ public interface TodoCommandService {
 
     @Transactional(readOnly = true)
     List<TodoGetResponse> getUnblockedTodos(Long memberId,Long folderId);
+
+    TodoOrderUpdateResponse updateTodoOrder(Long memberId, Long todoId, int targetOrder);
+
 }
 
