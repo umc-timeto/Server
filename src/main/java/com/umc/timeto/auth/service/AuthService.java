@@ -115,7 +115,9 @@ public class AuthService {
         KakaoLoginResponse response = new KakaoLoginResponse(
                 member.getMemberId(),
                 accessToken,
-                refreshToken
+                refreshToken,
+                member.getName(),
+                member.getEmail()
         );
 
         return new LoginResult(response, isNewMember);
