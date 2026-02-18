@@ -22,4 +22,11 @@ public class KakaoLoginResponse {
             example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     )
     private String refreshToken;
+
+    @Schema(description = "닉네임", example = "name")
+    private String name;
+
+    @Schema(description = "이메일", example = "test@example.com")
+    private String email;
 }
+
