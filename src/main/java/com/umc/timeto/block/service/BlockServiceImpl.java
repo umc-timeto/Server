@@ -47,6 +47,10 @@ public class BlockServiceImpl implements BlockService {
                 .plusSeconds(duration.getSecond());
         System.out.println("시작시간" +startAt + "끝나는시간" +endAt);
 
+        //생성 시 시작시간 추가되도록
+        todo.updateStartAt(startAt);
+
+
         List<Block> overlaps =
                 blockRepository
                         .findByTodo_Folder_Goal_Member_MemberIdAndStartAtLessThanAndEndAtGreaterThan(
