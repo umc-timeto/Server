@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @NoArgsConstructor
 public class DailyLogRequestDTO {
@@ -14,4 +16,6 @@ public class DailyLogRequestDTO {
 
     @Size(max = 255)
     private String answer3;
+
+    private LocalDate date;
 }
