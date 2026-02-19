@@ -58,7 +58,6 @@ public enum ErrorCode {
     /**
      * 409 CONFLICT - 요청 충돌
      */
-    DUPLICATE_DAILY_LOG(HttpStatus.CONFLICT, "일지는 하루에 하나만 작성할 수 있습니다."),
     AUTH_MEMBER_DUPLICATE(HttpStatus.CONFLICT, "이미 가입된 회원입니다."),
     AUTH_EMAIL_DUPLICATE(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     AUTH_SOCIAL_ID_DUPLICATE(HttpStatus.CONFLICT, "이미 연결된 소셜 계정입니다."),

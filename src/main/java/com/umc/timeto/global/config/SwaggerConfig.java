@@ -20,8 +20,8 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
         Info info = new Info()
-                .title("ZERO-Helper API") //이름
-                .description("당신의 평범한 일상이 취업 스펙이 되는 곳, Zero Helper"); //설명
+                .title("timeto API") //이름
+                .description("ADHD를 가진 개인을 지원하기 위해 설계된 태스크 관리 서비스, timeto"); //설명
 
         Server localServer = new Server().url("/");
 

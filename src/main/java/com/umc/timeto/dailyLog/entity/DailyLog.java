@@ -24,19 +24,19 @@ public class DailyLog {
     @Column(nullable = false)
     private Achievement answer2;  // 1-5 계획 이행
 
-    @Column(nullable = false)
     private String answer3;  // 잘한 점과 아쉬운 점
 
     @Column(nullable = false)
-    private LocalDate createdAt;
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public void update(Satisfaction answer1, Achievement answer2, String answer3) {
+    public void update(Satisfaction answer1, Achievement answer2, String answer3, LocalDate date) {
         this.answer1 = answer1;
         this.answer2 = answer2;
         this.answer3 = answer3;
+        this.date = date;
     }
 }
