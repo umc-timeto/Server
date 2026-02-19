@@ -29,6 +29,7 @@ public class BlockServiceImpl implements BlockService {
 
     private final TodoRepository todoRepository;
     private final BlockRepository blockRepository;
+    private final BusinessDayPolicy businessDayPolicy;
 
     @Override
     public BlockResponseDTO createBlock(Long todoId, BlockAddDTO req, Long memberId) {
@@ -45,7 +46,7 @@ public class BlockServiceImpl implements BlockService {
                 .plusHours(duration.getHour())
                 .plusMinutes(duration.getMinute())
                 .plusSeconds(duration.getSecond());
-        System.out.println("시작시간" +startAt + "끝나는시간" +endAt);
+
 
         //생성 시 시작시간 추가되도록
         todo.updateStartAt(startAt);
@@ -81,8 +82,10 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<BlockResponseDetailDTO> getBlockByDay(LocalDate date, Long memberId) {
 
-        LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end = date.atTime(23, 59, 59);
+        LocalDateTime time_standard = date.atTime(5, 0);
+
+        LocalDateTime start = businessDayPolicy.startOfBusinessDay(time_standard);
+        LocalDateTime end = businessDayPolicy.endOfBusinessDay(time_standard);
 
 //        List<Block> blocks =
 //                blockRepository
