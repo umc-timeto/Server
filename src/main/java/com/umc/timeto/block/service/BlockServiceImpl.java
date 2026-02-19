@@ -61,6 +61,7 @@ public class BlockServiceImpl implements BlockService {
 
         if (!overlaps.isEmpty()) {
             throw new GlobalException(ErrorCode.BLOCK_TIME_CONFLICT);
+            // 겹칠 시 가장 당일에 생성된 블록 중 가장 하단의 블록 밑에 자동 배치
         }
 
 
@@ -83,13 +84,20 @@ public class BlockServiceImpl implements BlockService {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(23, 59, 59);
 
+//        List<Block> blocks =
+//                blockRepository
+//                        .findByTodo_Folder_Goal_Member_MemberIdAndStartAtBetween(
+//                                memberId,
+//                                start,
+//                                end
+//                        );
+
         List<Block> blocks =
-                blockRepository
-                        .findByTodo_Folder_Goal_Member_MemberIdAndStartAtBetween(
-                                memberId,
-                                start,
-                                end
-                        );
+                blockRepository.findBlocksWithTodo(
+                        memberId,
+                        start,
+                        end
+                );
 
 
         return blocks.stream()
