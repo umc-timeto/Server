@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -77,24 +76,25 @@ public class BlockController implements BlockControllerDocs {
     }
 
 
-    @PatchMapping("/{blockId}/duration")
-    @Override
-    public ResponseEntity<ResponseDTO<Void>> updateDuration(
-            @PathVariable Long blockId,
-            @RequestParam LocalTime duration,
-            Authentication authentication
-    ) {
-
-        blockService.updateBlockDuration(
-                blockId,
-                getMemberId(authentication),
-                duration
-        );
-
-        return ResponseEntity.ok(
-                new ResponseDTO<>(ResponseCode.SUCCESS_UPDATE_BLOCK, null)
-        );
-    }
+//    @PatchMapping("/{blockId}/duration")
+//    @Override
+//    public ResponseEntity<ResponseDTO<Void>> updateDuration(
+//            @PathVariable Long blockId,
+//            @DateTimeFormat(pattern = "HH:mm:ss")
+//            @RequestParam LocalTime duration,
+//            Authentication authentication
+//    ) {
+//
+//        blockService.updateBlockDuration(
+//                blockId,
+//                getMemberId(authentication),
+//                duration
+//        );
+//
+//        return ResponseEntity.ok(
+//                new ResponseDTO<>(ResponseCode.SUCCESS_UPDATE_BLOCK, null)
+//        );
+//    }
 
 
 

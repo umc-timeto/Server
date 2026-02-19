@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ public class BlockServiceImpl implements BlockService {
 
     private final TodoRepository todoRepository;
     private final BlockRepository blockRepository;
+    private final BusinessDayPolicy businessDayPolicy;
 
     @Override
     public BlockResponseDTO createBlock(Long todoId, BlockAddDTO req, Long memberId) {
@@ -36,29 +38,51 @@ public class BlockServiceImpl implements BlockService {
         Todo todo = todoRepository.findByTodoIdAndFolder_Goal_Member_MemberId(todoId,memberId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.TODO_NOT_FOUND));
 
-
-        // 블록 겹침 조회
         LocalDateTime startAt = req.getStartAt();
-        LocalTime duration = todo.getDuration();
 
-        LocalDateTime endAt = startAt
-                .plusHours(duration.getHour())
-                .plusMinutes(duration.getMinute())
-                .plusSeconds(duration.getSecond());
-        System.out.println("시작시간" +startAt + "끝나는시간" +endAt);
+        // Todo당 Block 1개 보장
+        blockRepository.findByTodo_TodoId(todoId)
+                .ifPresent(b -> {
+                    throw new GlobalException(ErrorCode.BAD_REQUEST);
+                });
 
-        List<Block> overlaps =
+
+        // 05:00 기준 startAt에서 입력받은 날짜 범위
+        LocalDateTime dayStart = businessDayPolicy.startOfBusinessDay(startAt);
+        LocalDateTime dayEnd = businessDayPolicy.endOfBusinessDay(startAt);
+
+
+
+        List<Block> todayBlocks =
                 blockRepository
-                        .findByTodo_Folder_Goal_Member_MemberIdAndStartAtLessThanAndEndAtGreaterThan(
+                        .findByTodo_Folder_Goal_Member_MemberIdAndStartAtGreaterThanEqualAndStartAtLessThan(
                                 memberId,
-                                endAt,
-                                startAt
+                                dayStart,
+                                dayEnd
                         );
 
-        if (!overlaps.isEmpty()) {
-            throw new GlobalException(ErrorCode.BLOCK_TIME_CONFLICT);
+
+        System.out.println("dayStart = " + dayStart);
+        System.out.println("dayEnd = " + dayEnd);
+        System.out.println("todayBlocks size = " + todayBlocks.size());
+
+
+
+
+        if (todayBlocks.isEmpty()) {
+            // 오늘 블록 없으면 입력받은 시간에 생성
+            startAt = req.getStartAt();
+        } else {
+            // 가장 늦게 끝나는 블록 아래 배치
+            Block lastBlock = todayBlocks.stream()
+                    .max(Comparator.comparing(Block::getEndAt))
+                    .orElseThrow();
+
+            startAt = lastBlock.getEndAt();
         }
 
+        //생성 시 시작시간 추가되도록
+        todo.updateStartAt(startAt);
 
         //블록 저장
         Block block = new Block(todo, startAt);
@@ -76,16 +100,17 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<BlockResponseDetailDTO> getBlockByDay(LocalDate date, Long memberId) {
 
-        LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end = date.atTime(23, 59, 59);
+        LocalDateTime time_standard = date.atTime(5, 0);
+
+        LocalDateTime start = businessDayPolicy.startOfBusinessDay(time_standard);
+        LocalDateTime end = businessDayPolicy.endOfBusinessDay(time_standard);
 
         List<Block> blocks =
-                blockRepository
-                        .findByTodo_Folder_Goal_Member_MemberIdAndStartAtBetween(
-                                memberId,
-                                start,
-                                end
-                        );
+                blockRepository.findBlocksWithTodo(
+                        memberId,
+                        start,
+                        end
+                );
 
 
         return blocks.stream()
