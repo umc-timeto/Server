@@ -28,16 +28,11 @@ public class DailyLogServiceImpl implements DailyLogService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_FOUND)); // 에러 코드 수정
 
-        LocalDate today = LocalDate.now();
-        if (dailyLogRepository.findByMemberAndCreatedAt(member, today).isPresent()) {
-            throw new GlobalException(ErrorCode.DUPLICATE_DAILY_LOG);
-        }
-
         DailyLog dailyLog = DailyLog.builder()
                 .answer1(dto.getAnswer1())
                 .answer2(dto.getAnswer2())
                 .answer3(dto.getAnswer3())
-                .createdAt(today)
+                .date(dto.getDate())
                 .member(member)
                 .build();
 
@@ -48,7 +43,7 @@ public class DailyLogServiceImpl implements DailyLogService {
                 savedLog.getAnswer1(),
                 savedLog.getAnswer2(),
                 savedLog.getAnswer3(),
-                savedLog.getCreatedAt()
+                savedLog.getDate()
         );
     }
 
@@ -61,9 +56,9 @@ public class DailyLogServiceImpl implements DailyLogService {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
-        return dailyLogRepository.findByMemberAndCreatedAtBetween(member, start, end)
+        return dailyLogRepository.findByMemberAndDateBetweenOrderByDateAscIdAsc(member, start, end)
                 .stream()
-                .map(log -> new DailyLogMonthlyDTO(log.getId(), log.getCreatedAt(), log.getAnswer1()))
+                .map(log -> new DailyLogMonthlyDTO(log.getId(), log.getDate(), log.getAnswer1()))
                 .toList();
     }
 
@@ -86,7 +81,7 @@ public class DailyLogServiceImpl implements DailyLogService {
                 dailyLog.getAnswer1(),
                 dailyLog.getAnswer2(),
                 dailyLog.getAnswer3(),
-                dailyLog.getCreatedAt()
+                dailyLog.getDate()
         );
     }
 
@@ -102,14 +97,14 @@ public class DailyLogServiceImpl implements DailyLogService {
             throw new GlobalException(ErrorCode.LOG_FORBIDDEN);
         }
 
-        dailyLog.update(dto.getAnswer1(), dto.getAnswer2(), dto.getAnswer3());
+        dailyLog.update(dto.getAnswer1(), dto.getAnswer2(), dto.getAnswer3(), dto.getDate());
 
         return new DailyLogResponseDTO(
                 dailyLog.getId(),
                 dailyLog.getAnswer1(),
                 dailyLog.getAnswer2(),
                 dailyLog.getAnswer3(),
-                dailyLog.getCreatedAt()
+                dailyLog.getDate()
         );
     }
 
