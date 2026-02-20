@@ -17,6 +17,9 @@ public class RefreshToken {
     @Column(nullable = false, length = 500)
     private String token;
 
+    @Column(nullable = true)
+    private String deployCheck;
+
     private RefreshToken(Long memberId, String token) {
         this.memberId = memberId;
         this.token = token;
