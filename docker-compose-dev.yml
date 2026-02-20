@@ -3,12 +3,14 @@ services:
     image: mysql:8.0
     container_name: timeto-mysql-dev
     restart: always
+    env_file:
+      - .env
     environment:
+      TZ: ${TZ}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      TZ: ${TZ}
     ports:
       - "${MYSQL_PORT}:3306"
     volumes:
@@ -30,26 +32,13 @@ services:
     restart: always
     depends_on:
       - mysql
+    env_file:
+      - .env
+    environment:
+      TZ: ${TZ}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
     ports:
       - "${APP_PORT}:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      TZ: ${TZ}
-
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-
-      JWT_SECRET: ${JWT_SECRET}
-
-      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
-      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
-      KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URI}
-
-      JWT_ACCESS_EXP_SECONDS: ${JWT_ACCESS_EXP_SECONDS}
-      JWT_REFRESH_EXP_SECONDS: ${JWT_REFRESH_EXP_SECONDS}
-
-
     networks:
       - timetoDevNetwork
 
