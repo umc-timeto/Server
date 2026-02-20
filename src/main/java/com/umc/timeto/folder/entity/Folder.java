@@ -1,8 +1,12 @@
 package com.umc.timeto.folder.entity;
 
 import com.umc.timeto.goal.entity.Goal;
+import com.umc.timeto.todo.domain.Todo;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,6 +28,10 @@ public class Folder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "goal_id", nullable = false)
     private Goal goal;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "folder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Todo> todos = new ArrayList<>();
 
     public Folder(String name, Goal goal) {
         this.name = name;

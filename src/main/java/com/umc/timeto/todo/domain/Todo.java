@@ -62,7 +62,6 @@ public class Todo {
     @JoinColumn(name = "folder_id", nullable = false)
     private Folder folder;
 
-
     //todo 삭제 시 연결된 block 자동 삭제
     @OneToOne(
             mappedBy = "todo",
