@@ -23,5 +23,20 @@ jobs:
             git fetch --all
             git reset --hard origin/main
 
-            docker compose -f docker-compose-dev.yml --env-file .env.prod down
-            docker compose -f docker-compose-dev.yml --env-file .env.prod up -d --build
+            docker compose -f docker-compose-dev.yml --env-file .env down || true
+            docker compose -f docker-compose-dev.yml --env-file .env up -d --build --force-recreate --remove-orphans
+
+            # API가 뜰 때까지 최대 60초 대기
+            for i in {1..30}; do
+              if curl -fsS http://127.0.0.1:8080/v3/api-docs > /dev/null; then
+                echo "API is up"
+                exit 0
+              fi
+              sleep 2
+            done
+
+            echo "API did not become ready"
+            docker ps -a
+            docker logs timeto-app-dev --tail 200
+            exit 1
+       
